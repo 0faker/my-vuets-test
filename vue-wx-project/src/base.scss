@@ -1,0 +1,238 @@
+@charset "utf-8";
+
+/*!
+ * @名称：base.css
+ * @功能：1、重设浏览器默认样式
+ *       2、设置通用原子类
+ */
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+hr,
+button,
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  margin: 0;
+  padding: 0;
+  /* overflow: hidden; */
+  box-sizing: border-box;
+  outline: none;
+  border: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-size: 12px !important;
+}
+
+/* 要注意表单元素并不继承父级 font 的问题 */
+body,
+button,
+input,
+select,
+textarea {
+  font: 12px PingFangSC, Helvetica, arial, sans-serif;
+}
+
+
+/* 去掉 table cell 的边距并让其边重合 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ie bug：th 不继承 text-align */
+th {
+  text-align: inherit;
+}
+
+/* 去除默认边框 */
+fieldset,
+img {
+  border: none;
+}
+
+/* 一致的 del 样式 */
+del {
+  text-decoration: line-through;
+}
+
+/* 去掉列表前的标识，li 会继承 */
+ol,
+ul {
+  list-style: none;
+}
+
+/* 对齐是排版最重要的因素，别让什么都居中 */
+caption,
+th {
+  text-align: left;
+}
+
+/* 来自yahoo，让标题都自定义，适应多个系统应用 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+}
+
+q:before,
+q:after {
+  content: '';
+}
+
+/* 统一上标和下标 */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* 让链接在 hover 状态下显示下划线 */
+a:hover {
+  text-decoration: underline;
+}
+
+/* 默认不显示下划线，保持页面简洁 */
+ins,
+a {
+  text-decoration: none;
+}
+
+/* 去除 ie6 & ie7 焦点点状线 */
+a:focus,
+*:focus {
+  outline: none;
+}
+
+/* 清除浮动 */
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+  overflow: hidden;
+}
+
+.clearfix {
+  zoom: 1;
+  /* for ie6 & ie7 */
+}
+
+.clear {
+  clear: both;
+  display: block;
+  font-size: 0;
+  height: 0;
+  line-height: 0;
+  overflow: hidden;
+}
+
+/* 设置显示和隐藏，通常用来与 js 配合 */
+.hide {
+  display: none;
+}
+
+.block {
+  display: block;
+}
+
+/* 设置浮动，减少浮动带来的 bug */
+.fl,
+.fr {
+  display: inline;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+body {
+  font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, "PingFang SC", Arial, sans-serif;
+}
+
+//公用头部样式
+.header {
+  height: $header-height;
+  background-color: $baseGreen;
+  color: #fff;
+  text-align: center;
+  font-size: 1.5rem;
+  line-height: $header-height;
+  position: relative;
+
+  >.back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3rem;
+    padding: 0.75rem;
+    height: 100%;
+
+    >img {
+      height: 2.15rem;
+    }
+  }
+
+  >.header-r {
+    position: absolute;
+    top: 0;
+    right: 0;
+    // width: 3rem;
+    font-size: 1.25rem;
+    height: 100%;
+  }
+}

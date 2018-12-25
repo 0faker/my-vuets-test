@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="88px" height="88px" viewBox="0 0 88 88" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.1 (47250) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_back</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="亲属端" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="ic_back" fill="#FFFFFF" fill-rule="nonzero">
+            <path d="M31.7748752,25.2668026 C30.7990971,24.2899596 30.7999603,22.7070474 31.7768034,21.7312692 C32.7536464,20.7554911 34.3365586,20.7563544 35.3123368,21.7331974 L55.2687308,41.7113706 C56.2437564,42.6874603 56.2437564,44.2688861 55.2687308,45.2449758 L35.2687308,65.2668026 C34.2929527,66.2436456 32.7100404,66.2445089 31.7331974,65.2687308 C30.7563544,64.2929526 30.7554911,62.7100404 31.7312692,61.7331974 L49.9663927,43.4781732 L31.7748752,25.2668026 Z" transform="translate(43.500000, 43.500000) rotate(-180.000000) translate(-43.500000, -43.500000) "></path>
+        </g>
+    </g>
+</svg>

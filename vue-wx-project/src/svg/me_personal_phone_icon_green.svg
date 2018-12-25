@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="34px" viewBox="0 0 26 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>me_personal_phone_icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="交互设计" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="个人信息" transform="translate(-24.000000, -574.000000)">
+            <g id="新手引导" transform="translate(0.000000, 540.000000)">
+                <g id="me_personal_phone_icon" transform="translate(24.000000, 34.000000)">
+                    <rect id="Rectangle-2" fill="#4CAF50" x="8" y="4" width="10" height="1.5" rx="0.75"></rect>
+                    <circle id="Oval" stroke="#4CAF50" stroke-width="1.5" cx="13" cy="26" r="3"></circle>
+                    <rect id="Rectangle" stroke="#4CAF50" stroke-width="2" x="1" y="1" width="24" height="32" rx="3"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

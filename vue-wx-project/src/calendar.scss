@@ -1,0 +1,21 @@
+/* 日历控件样式 */
+.wh_container {
+ >.wh_content_all {
+  background-color: #000 !important;
+
+  .wh_isToday {
+   background: #000 !important;
+   color: #fff;
+  }
+
+  .wh_chose_day {
+   background: #fff !important;
+   color: #000;
+  }
+
+ }
+}
+
+.wh_content {
+ justify-content: space-around
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="26px" viewBox="0 0 26 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>log_ic_delete</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="亲属端" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="登录（获取验证码）" transform="translate(-700.000000, -341.000000)">
+            <g id="log_ic_delete" transform="translate(700.000000, 341.000000)">
+                <circle id="Oval" fill="#BCBBBB" cx="13" cy="13" r="13"></circle>
+                <g id="X" transform="translate(7.000000, 7.000000)" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                    <polyline id="Arrow-Left-Copy" transform="translate(9.000000, 6.000000) rotate(-180.000000) translate(-9.000000, -6.000000) " points="6.01308179 2.13162821e-14 12 5.99345197 6 12"></polyline>
+                    <polyline id="Arrow-Left-Copy" transform="translate(3.000000, 6.000000) scale(-1, 1) rotate(-180.000000) translate(-3.000000, -6.000000) " points="0.0130817929 2.13162821e-14 6 5.99345197 1.98951966e-13 12"></polyline>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

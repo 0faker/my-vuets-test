@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_next</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="交互设计" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="ic_next" fill="#1C1A20" fill-rule="nonzero">
+            <path d="M20.5469707,14.8445351 C19.8581862,14.1933064 19.8587955,13.1380316 20.5483318,12.4875128 C21.2378681,11.8369941 22.3552179,11.8375696 23.0440024,12.4887983 L37.1308688,25.8075804 C37.8191222,26.4583069 37.8191222,27.5125907 37.1308688,28.1633172 L23.0132217,41.5112017 C22.3244372,42.1624304 21.2070874,42.1630059 20.5175511,41.5124872 C19.8280148,40.8619684 19.8274055,39.8066936 20.51619,39.1554649 L33.3880419,26.9854488 L20.5469707,14.8445351 Z" transform="translate(28.823529, 27.000000) scale(-1, 1) rotate(-180.000000) translate(-28.823529, -27.000000) "></path>
+        </g>
+    </g>
+</svg>
