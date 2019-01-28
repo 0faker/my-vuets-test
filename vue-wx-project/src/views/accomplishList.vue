@@ -79,7 +79,7 @@
   })
   export default class Accomplish extends Vue {
     nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
-    id: string = "";
+    id: string = ""; //患者id
     currentPageNo: number = 1;
     pageSize: number = 10;
     prescriptionDate: string | null = null;
@@ -210,6 +210,15 @@
       }
       return this.changeSEC(result);
     }
+    /**
+     * 跳到康复详情
+     * @param id:记录id
+     */
+    getdetail(id: string) {
+      this.$router.push({
+        path: `/${this.id}/accomplishinfo/${id}`
+      });
+    }
   }
 </script>
 <style lang='scss' scoped>
@@ -217,10 +226,6 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    > .header {
-    }
-    // overflow-y: scroll;
-
     > .scroll-list-wrap {
       // height: 30rem;
       // flex: 1;

@@ -63,8 +63,19 @@ declare namespace Server {
   bindFamily(id: number, phone: string, authCode: string): Promise<any>;
   getReportInfo(id: string, recordid: string): Promise<any>;
   getAccomplishedList(id: string, prescriptionDate: string | null, currentPageNo: number, pageSize: number): Promise<any>;
+  getAccomplishedInfo(patientid: string, recordid: string): Promise<any>;
+  getAccomplishedPrescription(id: string): Promise<any>;
   getAssessmentList(id: string, prescriptionDate: string | null, currentPageNo: number, pageSize: number): Promise<any>;
+  getAssessmentInfo(id: string): Promise<any>;
   getMonitortList(id: string, prescriptionDate: string | null, currentPageNo: number, pageSize: number): Promise<any>;
+  getMonitorInfo(id: string): Promise<any>;
   getPrenventList(id: string, prescriptionDate: string | null, currentPageNo: number, pageSize: number): Promise<any>;
+  getPreventiveInfo(id: string): Promise<any>;
+  getBorg(): Promise<any>;
+  getPayPatient(phone: number): Promise<any>;
+  RegistPatient(phone: string, code: string): Promise<any>;
+  GetCityDoctors(cityId: number, name: string, pageSize: number, currentPage: number): Promise<any>
+  GetCityLists(): Promise<any>;
+  GetCommonDoctorService(id: number, patientid: number): Promise<any>
  }
 }

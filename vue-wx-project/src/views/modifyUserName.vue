@@ -1,7 +1,10 @@
 <template>
   <div class="modifyusername">
     <div class="header">
-      <div class="cancel">
+      <div
+        class="cancel"
+        @click="cancel"
+      >
         取消
       </div>
       <div class="title">
@@ -32,55 +35,56 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-@Component
-export default class ModifyUserName extends Vue {
-    name: string = '';
-    userId: string = '';
-    warnMsg: string = '';
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  @Component
+  export default class ModifyUserName extends Vue {
+    name: string = "";
+    userId: string = "";
+    warnMsg: string = "";
     isSure: boolean = true; // 完成可点击
-  constructor() {
-    super();
-  }
+    constructor() {
+      super();
+    }
     created() {
-    this.userId = this.$route.params.id;
-    this.name = this.$route.query.username + '';
-  }
-  /**
-   * 输入新姓名
-   */
+      this.userId = this.$route.params.id;
+      this.name = this.$route.query.username + "";
+    }
+    /**
+     * 输入新姓名
+     */
     modifyusername() {
-    const nameEle: Vue | Element | Vue[] | Element[] = this.$refs.name;
-    // console.log(nameEle.value);
-    console.log(this.name);
-    if (/^[\u4E00-\u9FA5]{2,4}$/.test(this.name)) {
-      this.isSure = false;
-      // this.msg = "";
-    } else {
-      // this.msg = "姓名格式错误,请输入2-4位中文";
-      this.warnMsg = '姓名格式不正确，请重新输入！';
-      this.isSure = true;
+      const nameEle: Vue | Element | Vue[] | Element[] = this.$refs.name;
+      // console.log(nameEle.value);
+      console.log(this.name);
+      if (/^[\u4E00-\u9FA5]{2,4}$/.test(this.name)) {
+        this.isSure = false;
+        // this.msg = "";
+      } else {
+        // this.msg = "姓名格式错误,请输入2-4位中文";
+        this.warnMsg = "姓名格式不正确，请重新输入！";
+        this.isSure = true;
+      }
+    }
+    /**
+     * 确定修改
+     */
+    sureModify() {
+      this.$server
+        .modify(this.userId, this.name, null, null, null, null)
+        .then(() => {
+          this.$store.state.isBack = true;
+          this.$router.back();
+        });
+    }
+    /**
+     * 取消返回
+     */
+    cancel() {
+      console.log("back");
+      this.$store.state.isBack = true;
+      this.$router.back();
     }
   }
-  /**
-   * 确定修改
-   */
-    sureModify() {
-    this.$server
-      .modify(this.userId, this.name, null, null, null, null)
-      .then(() => {
-        this.$store.state.isBack = true;
-        this.$router.back();
-      });
-  }
-  /**
-   * 取消返回
-   */
-    cancel() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-}
 </script>
 <style lang='scss' scoped>
   .modifyusername {

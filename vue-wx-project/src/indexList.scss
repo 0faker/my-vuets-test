@@ -1,0 +1,80 @@
+.cube-index-list-content {
+ background-color: #222;
+ color: #909090;
+
+ >ul {
+  >li {
+   font-size: 1rem;
+   color: #909090;
+
+   >h2 {
+    background: #EEEEEE;
+    color: $basefontcolor2;
+    padding: 0 1rem;
+    height: 2rem;
+    line-height: 2rem;
+    font-weight: bold;
+   }
+
+   >ul {
+    >li {
+     border-bottom: .12rem solid #eee;
+
+     >div {
+      height: 3.67rem;
+      line-height: 3.67rem;
+      color: $basefontcolor2;
+      font-size: 1.166rem;
+      padding-left: 1rem;
+     }
+    }
+
+    >li:nth-last-of-type(1) {
+     border: 0;
+    }
+   }
+  }
+ }
+}
+
+.cube-index-list-anchor {
+ background-color: #333;
+ height: 30px;
+ line-height: 30px;
+ padding: 0 0 0 20px;
+}
+
+.cube-index-list-nav {
+ background: #eeeeee;
+ padding: 9rem 0;
+ width: 2rem;
+ height: 100%;
+
+ >ul {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  >li {
+   font-size: 1rem;
+   color: #909090;
+   flex: 1;
+   padding: 0 !important;
+   text-align: center;
+
+   &.active {
+    color: #ffcd32;
+   }
+  }
+ }
+}
+
+
+
+.custom-item {
+ position: relative;
+ height: 70px;
+ line-height: 70px;
+ padding: 0 16px;
+ font-size: 1rem;
+}

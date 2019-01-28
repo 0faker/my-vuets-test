@@ -71,17 +71,17 @@
   </cube-scroll>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import Calendar from '../../node_modules/vue-calendar-component/lib/calendar.vue';
-import common from '../common/common';
-@Component({
-  components: {
-    Calendar,
-  },
-})
-export default class PreventList extends Vue {
-    nowDate: string = Math.ceil(new Date().getTime() / 1000) + '';
-    id: string = '';
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
+  import common from "../common/common";
+  @Component({
+    components: {
+      Calendar
+    }
+  })
+  export default class PreventList extends Vue {
+    nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
+    id: string = "";
     currentPageNo: number = 1;
     pageSize: number = 10;
     prescriptionDate: string | null = null;
@@ -89,88 +89,97 @@ export default class PreventList extends Vue {
     AccomplishListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
     options: any = {};
     mounted() {
-    this.id = this.$route.params.id;
-    this.getPrenventList();
-  }
-  /**
-   * 回到上页
-   */
-    back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-  // 初始化
-    initialize() {
-    this.options = {
-      pullDownRefresh: {
-        txt: '刷新成功',
-      },
-      pullUpLoad: {
-        text: '加载成功',
-      },
-      scrollY: true,
-    };
-  }
-    clickDay(data: any) {
-    console.log(this.nowDate);
-    console.log(data); // 选中某天
-  }
-    changeDate(data: any) {
-    console.log(data); // 左右点击切换月份
-  }
-    clickToday(data: any) {
-    console.log(data); // 跳到了本月
-  }
-  /**
-   * 获取预防记录列表
-   */
-    getPrenventList() {
-    this.$server
-      .getPrenventList(
-        this.id,
-        this.prescriptionDate,
-        this.currentPageNo,
-        this.pageSize,
-      )
-      .then((res) => {
-        this.AccomplishListResult = this.AccomplishListResult.concat(
-          res.result,
-        );
-        this.AccomplishList = common.changeMsg(this.AccomplishListResult);
-        console.log(this.AccomplishList);
-      });
-  }
-  /**
-   * 下拉
-   */
-    onPullingDown() {}
-  /**
-   * 上拉
-   */
-    onPullingUp() {}
-  /**
-   *  秒=>时分秒
-   */
-    changeSEC(input: number) {
-    return common.changeSEC(input);
-  }
-  /**
-   * 转换时间戳
-   */
-    getDate(input: number, type: string) {
-    return common.getDate(input, type);
-  }
-  /**
-   * 计算总时长
-   */
-    getTotalTime(data: any) {
-    let result = 0;
-    for (const i in data) {
-      result += data[i].totalExerciseTime;
+      this.id = this.$route.params.id;
+      this.getPrenventList();
     }
-    return this.changeSEC(result);
+    /**
+     * 回到上页
+     */
+    back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    // 初始化
+    initialize() {
+      this.options = {
+        pullDownRefresh: {
+          txt: "刷新成功"
+        },
+        pullUpLoad: {
+          text: "加载成功"
+        },
+        scrollY: true
+      };
+    }
+    clickDay(data: any) {
+      console.log(this.nowDate);
+      console.log(data); // 选中某天
+    }
+    changeDate(data: any) {
+      console.log(data); // 左右点击切换月份
+    }
+    clickToday(data: any) {
+      console.log(data); // 跳到了本月
+    }
+    /**
+     * 获取预防记录列表
+     */
+    getPrenventList() {
+      this.$server
+        .getPrenventList(
+          this.id,
+          this.prescriptionDate,
+          this.currentPageNo,
+          this.pageSize
+        )
+        .then(res => {
+          this.AccomplishListResult = this.AccomplishListResult.concat(
+            res.result
+          );
+          this.AccomplishList = common.changeMsg(this.AccomplishListResult);
+          console.log(this.AccomplishList);
+        });
+    }
+    /**
+     * 下拉
+     */
+    onPullingDown() {}
+    /**
+     * 上拉
+     */
+    onPullingUp() {}
+    /**
+     *  秒=>时分秒
+     */
+    changeSEC(input: number) {
+      return common.changeSEC(input);
+    }
+    /**
+     * 转换时间戳
+     */
+    getDate(input: number, type: string) {
+      return common.getDate(input, type);
+    }
+    /**
+     * 计算总时长
+     */
+    getTotalTime(data: any) {
+      let result = 0;
+      for (const i in data) {
+        result += data[i].totalExerciseTime;
+      }
+      return this.changeSEC(result);
+    }
+    /**
+     * 跳到预防记录详情
+     * @param id:记录id
+     */
+    getdetail(id: string) {
+      this.$router.push({
+        path: `/preventinfo/${id}`
+      });
+    }
   }
-}
 </script>
 <style lang='scss' scoped>
   .accomplished {

@@ -1,12 +1,12 @@
 // import BaseEntity from "./base";
 
-declare namespace Accomplished {
+declare module Accomplished {
  // 康复记录
  export interface AccomplishedInfo {
   id: number;
-  dailyPrescription: string;
+  dailyPrescription: Prescriptions.DailyPrescriptions;
   totalExerciseTime: number;
-  effectiveExerciseTime: string;
+  effectiveExerciseTime: number;
   stepNumber: string;
   maxHrOfExercise: string;
   minHrOfExercise: string;
@@ -35,6 +35,9 @@ declare namespace Accomplished {
   // 训练结束时间
   downloaded: string;
   borg: string;
+  borgCategory: {
+   id: number
+  }
   prescriptionDate: number;
 
  }

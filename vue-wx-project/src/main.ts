@@ -5,19 +5,26 @@ import store from './store';
 import './registerServiceWorker';
 import './base.scss';
 import './calendar.scss';
+import './indexList.scss';
 import './cube-ui';
+import 'weui';
 import {
   /* eslint-disable no-unused-vars */
   Dialog,
   createAPI,
   DatePicker,
-  Picker,
+  Picker, IndexList
 } from 'cube-ui';
-Vue.use(DatePicker, Picker);
+Vue.use(DatePicker, Picker, IndexList);
 Vue.use(Picker);
 import Server from './fetch/fetch';
 import Common from './common/common';
 import VueRouter from 'vue-router';
+import VueQuickLoadmore from 'vue-quick-loadmore';
+// declare global;
+// declare var vue-quick-loadmore: any;
+
+Vue.use(VueQuickLoadmore)
 
 console.log('VueRouter');
 console.log(VueRouter.prototype);

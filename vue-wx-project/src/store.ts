@@ -8,6 +8,7 @@ export default new Vuex.Store({
     userName: '',
     // cyclePrescriptions: [],
     isBack: false,
+
   },
   mutations: {
 

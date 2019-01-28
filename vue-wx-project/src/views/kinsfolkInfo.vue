@@ -21,7 +21,7 @@
     <main>
       <div class="patient-info">
         <div class="name">
-          <span>安安</span>
+          <span>{{famliyInfo.name}}</span>
           <male v-if="famliyInfo.sex==='0'" />
           <female v-if="famliyInfo.sex==='1'" />
         </div>
@@ -124,119 +124,119 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import male from '../svg/ic_male.svg';
-import female from '../svg/ic_female.svg';
-import Age from '../svg/green_year.svg';
-import Height from '../svg/green_height.svg';
-import Weight from '../svg/green_weight.svg';
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  import male from "../svg/ic_male.svg";
+  import female from "../svg/ic_female.svg";
+  import Age from "../svg/green_year.svg";
+  import Height from "../svg/green_height.svg";
+  import Weight from "../svg/green_weight.svg";
 
-import Common from '../common/common';
-import ls from 'local-storage';
-@Component({
-  components: {
-    male,
-    female,
-    Age,
-    Height,
-    Weight,
-  },
-})
-export default class kinsfolkInfo extends Vue {
+  import Common from "../common/common";
+  import ls from "local-storage";
+  @Component({
+    components: {
+      male,
+      female,
+      Age,
+      Height,
+      Weight
+    }
+  })
+  export default class kinsfolkInfo extends Vue {
     patientId: number = 0;
     famliyInfo!: Patient.PatientInfo;
     BMI: number = 0;
     imgSrc: number = 0; // 根据BMI选择不同颜色的人体图形
-  constructor() {
-    super();
-  }
-    created() {
-    this.famliyInfo = ls.get('selectedFamily');
-    this.patientId = this.famliyInfo.id;
-    this.getBMI();
-  }
-  /**
-   * 回到上页
-   */
-    back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-  /**
-   * 计算BMI
-   */
-    getBMI() {
-    this.BMI = Common.computedBMI(
-      +this.famliyInfo.height,
-      +this.famliyInfo.weight,
-    );
-    this.getBMIImgSrc();
-  }
-  /**
-   * 年龄
-   */
-    getAge(birthday: number) {
-    return birthday ? Common.computeAge(birthday) + '岁' : '未填写';
-  }
-  /**
-   * 身高
-   */
-    getHeight(height: string) {
-    return height ? height + 'cm' : '未填写';
-  }
-  /**
-   * 体重
-   */
-    getWeight(weight: string) {
-    return weight ? weight + 'kg' : '未填写';
-  }
-    getBMIImgSrc() {
-    if (+this.BMI > 0 && +this.BMI < 19) {
-      this.imgSrc = 1;
-    } else if (+this.BMI >= 19 && +this.BMI < 24) {
-      this.imgSrc = 2;
-    } else if (+this.BMI >= 24 && +this.BMI < 29) {
-      this.imgSrc = 3;
-    } else if (+this.BMI >= 29 && +this.BMI <= 40) {
-      this.imgSrc = 4;
-    } else if (+this.BMI > 40) {
-      this.imgSrc = 5;
-    } else {
-      this.imgSrc = 0;
+    constructor() {
+      super();
     }
-  }
+    created() {
+      this.famliyInfo = ls.get("selectedFamily");
+      this.patientId = this.famliyInfo.id;
+      this.getBMI();
+    }
+    /**
+     * 回到上页
+     */
+    back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    /**
+     * 计算BMI
+     */
+    getBMI() {
+      this.BMI = Common.computedBMI(
+        +this.famliyInfo.height,
+        +this.famliyInfo.weight
+      );
+      this.getBMIImgSrc();
+    }
+    /**
+     * 年龄
+     */
+    getAge(birthday: number) {
+      return birthday ? Common.computeAge(birthday) + "岁" : "未填写";
+    }
+    /**
+     * 身高
+     */
+    getHeight(height: string) {
+      return height ? height + "cm" : "未填写";
+    }
+    /**
+     * 体重
+     */
+    getWeight(weight: string) {
+      return weight ? weight + "kg" : "未填写";
+    }
+    getBMIImgSrc() {
+      if (+this.BMI > 0 && +this.BMI < 19) {
+        this.imgSrc = 1;
+      } else if (+this.BMI >= 19 && +this.BMI < 24) {
+        this.imgSrc = 2;
+      } else if (+this.BMI >= 24 && +this.BMI < 29) {
+        this.imgSrc = 3;
+      } else if (+this.BMI >= 29 && +this.BMI <= 40) {
+        this.imgSrc = 4;
+      } else if (+this.BMI > 40) {
+        this.imgSrc = 5;
+      } else {
+        this.imgSrc = 0;
+      }
+    }
 
     route(index: number) {
-    switch (index) {
-      case 1:
-        // 处方
-        this.$router.push({
-          path: `/cycleprescriptionlists/${this.patientId}`,
-        });
-        break;
-      case 2:
-        // 康复
-        this.$router.push({ path: `/accomplish/${this.patientId}` });
-        break;
-      case 3:
-        // 报告
-        this.$router.push({ path: `/reportlists/${this.patientId}` });
-        break;
-      case 4:
-        // 评价
-        this.$router.push({ path: `/assessmentlist/${this.patientId}` });
-        break;
-      case 5:
-        // 预防
-        this.$router.push({ path: `/preventlist/${this.patientId}` });
-        break;
-      case 6:
-        // 监测
-        this.$router.push({ path: `/monitorlist/${this.patientId}` });
-        break;
+      switch (index) {
+        case 1:
+          // 处方
+          this.$router.push({
+            path: `/cycleprescriptionlists/${this.patientId}`
+          });
+          break;
+        case 2:
+          // 康复
+          this.$router.push({ path: `/accomplishlist/${this.patientId}` });
+          break;
+        case 3:
+          // 报告
+          this.$router.push({ path: `/reportlists/${this.patientId}` });
+          break;
+        case 4:
+          // 评价
+          this.$router.push({ path: `/assessmentlist/${this.patientId}` });
+          break;
+        case 5:
+          // 预防
+          this.$router.push({ path: `/preventlist/${this.patientId}` });
+          break;
+        case 6:
+          // 监测
+          this.$router.push({ path: `/monitorlist/${this.patientId}` });
+          break;
+      }
     }
   }
-}
 </script>
 <style lang='scss' scoped>
   .kinsfolk {
@@ -307,6 +307,7 @@ export default class kinsfolkInfo extends Vue {
               padding-left: 1.5rem;
               font-size: 1.25rem;
               color: #7a7979;
+              margin: 0.5rem 0;
               > span {
                 width: 1.04rem;
                 height: 1rem;

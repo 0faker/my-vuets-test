@@ -7,24 +7,24 @@
 
 </template>
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-@Component
-export default class App extends Vue {
-    transitionName: string = '';
-  /**
-   * 监听路由
-   */
-  @Watch('$route')
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  @Component
+  export default class App extends Vue {
+    transitionName: string = "";
+    /**
+     * 监听路由
+     */
+    @Watch("$route")
     getTransitionName(to: any, from: any) {
-    this.transitionName = this.$store.state.isBack
-      ? 'slide-right'
-      : 'slide-left';
-    this.$store.state.isBack = false;
-  }
+      this.transitionName = this.$store.state.isBack
+        ? "slide-right"
+        : "slide-left";
+      this.$store.state.isBack = false;
+    }
     beforeRouteEnter(to: any, from: any, next: any) {
-    next();
+      next();
+    }
   }
-}
 </script>
 
 <style>
@@ -62,4 +62,30 @@ export default class App extends Vue {
     transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
     transform: translate(-100%, 0);
   }
+  .slide-left-leave,
+  .slide-right-enter-active {
+    opacity: 0;
+    -webkit-transform: translate(-100%, 0);
+    transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+    transform: translate(-100%, 0);
+  }
+  .slide-right-enter,
+  .slide-left-leave-active {
+    opacity: 0;
+    -webkit-transform: translate(-100%, 0);
+    transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+    transform: translate(-100%, 0);
+  }
+  /* .slide-left-enter-active {
+          opacity: 0;
+          -webkit-transform: translate(-100%, 0);
+          transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+          transform: translate(-100%, 0);
+        }
+        .slide-left-enter-to {
+          opacity: 0;
+          -webkit-transform: translate(0, 0);
+          transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+          transform: translate(0, 0);
+        } */
 </style>

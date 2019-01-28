@@ -1,11 +1,11 @@
-import { SexEnum } from './enum/sex.enum';
-import momnet from 'moment';
+import { SexEnum } from '../enum/sex.enum';
+import moment from 'moment';
 class Common {
  /**
   * 转换手机号码334格式
   * @param input
   */
-   change(input: string): string {
+ change(input: string): string {
   const value = input.replace(/\s*/g, '');
   const result = [];
   for (let i = 0; i < value.length; i++) {
@@ -20,7 +20,7 @@ class Common {
  /**
   * 手机号码正则
   */
-   regPhone(input: number) {
+ regPhone(input: number) {
   const result = input.toString();
   const reg = /^1[0-9][0-9]\d{8}$/;
   if (!reg.test(result)) {
@@ -34,7 +34,7 @@ class Common {
   * 判断手机类型
   *
   */
-   getPhoneType() {
+ getPhoneType() {
   if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)) {
    // ios返回ios其他返回other;
    return 'ios';
@@ -45,7 +45,7 @@ class Common {
  /**
   * 转换性别
   */
-   getSex(input: string) {
+ getSex(input: string) {
   let result: string = '';
   if (+input === SexEnum.man) {
    result = '男';
@@ -60,8 +60,8 @@ class Common {
   * 计算年龄
   * @param input
   */
-   computeAge(input: number) {
-  return +momnet().format('YYYY') - +momnet(input).format('YYYY');
+ computeAge(input: number) {
+  return +moment().format('YYYY') - +moment(input).format('YYYY');
  }
  /**
   * 计算BMI 体重/身高(m)的平方
@@ -69,7 +69,7 @@ class Common {
   * @param weight kg
   * 两位小数
   */
-   computedBMI(height: number, weight: number) {
+ computedBMI(height: number, weight: number) {
   if (height && weight) {
    return Math.round(weight / (height * height / 10000) * 100) / 100;
   } else {
@@ -80,7 +80,7 @@ class Common {
   * 转换运动形式
   * @param input 运动形式
   */
-   getExerciseType(input: string) {
+ getExerciseType(input: string) {
   let result = '';
   if (input === '1') {
    result = '散步';
@@ -97,7 +97,7 @@ class Common {
   * 更改日期格式转换时分秒
   * @param s 秒数
   */
-   changeSEC(s: number) {
+ changeSEC(s: number) {
   let t;
   if (s > -1) {
    const hour = Math.floor(s / 3600);
@@ -122,17 +122,17 @@ class Common {
  /**
   * 时间戳=>字符串
   */
-   getDate(input: number, type: string) {
+ getDate(input: number, type: string) {
   switch (type) {
-   case 'd': return momnet(input).format('YYYY-MM-DD'); // 天
-   case 'hms': return momnet(input).format('HH:mm:ss'); // 秒
+   case 'd': return moment(input).format('YYYY-MM-DD'); // 天
+   case 'hms': return moment(input).format('HH:mm:ss'); // 秒
   }
  }
  /**
   * 转换记录列表数据(除康复记录)
   * @param arr
   */
-   changeMsg(arr: any[]) {
+ changeMsg(arr: any[]) {
   console.log(arr);
   if (arr.length != 0) {
    const listArr = [arr[0]];
@@ -159,6 +159,37 @@ class Common {
   } else {
    return [];
   }
+ }
+ /**
+  * BMI对应的文字说明
+  * @param bmi 
+  */
+ BMIExplain(bmi: number) {
+  let BMIExplain = '';
+  if (bmi < 18.5) {
+   BMIExplain = '（过轻）';
+  } else if (bmi >= 18.5 && bmi <= 24) {
+   BMIExplain = '（健康）';
+  } else if (bmi > 24 && bmi <= 29) {
+   BMIExplain = '（过重）';
+  } else if (bmi > 29 && bmi <= 40) {
+   BMIExplain = '（肥胖）';
+  } else if (bmi > 40) {
+   BMIExplain = '（极度肥胖）';
+  }
+  return BMIExplain;
+ }
+ /**
+  * 数组去重
+  */
+ deleteRepeat(array: any[]) {
+  let result: any[] = [];
+  for (let i = 0; i < array.length; i++) {
+   if (result.indexOf(array[i]) == -1) {
+    result.push(array[i]);
+   }
+  }
+  return result;
  }
 }
 
