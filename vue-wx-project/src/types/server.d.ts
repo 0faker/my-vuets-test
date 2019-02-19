@@ -10,8 +10,8 @@ declare namespace Server {
   equipmentId: string;
   logonMac: string;
   origin: number;
-  phone?: number;
-  authCode?: string;
+  phone: string;
+  authCode: string;
   unionId: number;
   openId: number;
  }
@@ -74,8 +74,21 @@ declare namespace Server {
   getBorg(): Promise<any>;
   getPayPatient(phone: number): Promise<any>;
   RegistPatient(phone: string, code: string): Promise<any>;
-  GetCityDoctors(cityId: number, name: string, pageSize: number, currentPage: number): Promise<any>
+  GetCityDoctors(pageSize: number, currentPage: number, cityId?: number, name?: string): Promise<any>;
   GetCityLists(): Promise<any>;
-  GetCommonDoctorService(id: number, patientid: number): Promise<any>
+  GetCommonDoctorService(id: number, patientId: number): Promise<any>;
+  GetThreeMinutesRecords(monitoringRecordId: number): Promise<any>;
+  GetAnalysisResult(id: number): Promise<any>;
+  GetStsTicket(): Promise<any>;
+  /**
+   * 扫码
+   * @param userid 
+   * @param qrcode 
+   */
+  addPaitienQRcode(userid: number, qrcode: any): Promise<any>
+  GetWxPaySignature(orderId: number, openId: number): Promise<any>
+  GetOpenid(code: string): Promise<any>
+  GetOrderNews(id: number): Promise<any>
+  GetPayOrder(productId: number, doctorId: number, patientId: number): Promise<any>
  }
 }

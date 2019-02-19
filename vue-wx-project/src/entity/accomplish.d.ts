@@ -1,6 +1,6 @@
 // import BaseEntity from "./base";
 
-declare module Accomplished {
+declare namespace Accomplished {
  // 康复记录
  export interface AccomplishedInfo {
   id: number;
@@ -36,8 +36,8 @@ declare module Accomplished {
   downloaded: string;
   borg: string;
   borgCategory: {
-   id: number
-  }
+   id: number,
+  };
   prescriptionDate: number;
 
  }

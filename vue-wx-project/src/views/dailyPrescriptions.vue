@@ -75,24 +75,24 @@ import common from '../common/common';
 import ls from 'local-storage';
 @Component
 export default class DailyPrescriptions extends Vue {
-    id: string = '';
-    dailyPrescription?: Prescriptions.DailyPrescriptions;
-    loadding: boolean = false;
-    mounted() {
+    public id: string = '';
+    public dailyPrescription?: Prescriptions.DailyPrescriptions;
+    public loadding: boolean = false;
+    public mounted() {
     this.id = this.$route.params.id; // 周期处方id
     this.getCyclePrescriptions();
   }
   /**
    * 回到上页
    */
-    back() {
+    public back() {
         this.$store.state.isBack = true;
         this.$router.back();
   }
   /**
    * 获取周期处方
    */
-    getCyclePrescriptions() {
+    public getCyclePrescriptions() {
     const dailyPrescriptions: Prescriptions.DailyPrescriptions[] = ls.get(
       'dailyprescriptions',
     );
@@ -104,13 +104,13 @@ export default class DailyPrescriptions extends Vue {
   /**
    * 时间戳=>字符串
    */
-    getAddTime(input: string) {
+    public getAddTime(input: string) {
     return moment(input).format('YYYY.MM.DD');
   }
   /**
    * 查看日处方
    */
-    getExerciseType(input: string) {
+    public getExerciseType(input: string) {
     return common.getExerciseType(input);
   }
 }

@@ -3,7 +3,7 @@
     ref="scroll1"
     class="scroll-list-outer-wrap"
   >
-    <div class="accomplished">
+    <div class="prevent">
       <div class="header">
         <div
           class="back"
@@ -18,8 +18,19 @@
         <div class="title">
           预防记录
         </div>
-        <div class="header-r">
+        <div
+          v-if="isGetAll"
+          class="header-r"
+          @click="clickToday"
+        >
           回到当天
+        </div>
+        <div
+          v-else
+          class="header-r"
+          @click="getAll"
+        >
+          全部
         </div>
       </div>
       <!--  
@@ -27,29 +38,34 @@
   :futureDayHide='1525104000' //某个日期以后的不允许点击  时间戳10位
   -->
       <calendar
+        ref="Calendar"
         @choseDay="clickDay"
         @changeMonth="changeDate"
         :futureDayHide='nowDate'
         :topText="['周日','周一', '周二', '周三', '周四', '周五', '周六']"
+        :markDateMore="markDate"
       ></calendar>
       <!-- <div>
       收起日历
     </div> -->
-      <div class="scroll-list-wrap">
+      <div
+        class="scroll-list-wrap"
+        v-if="ishavedate"
+      >
         <cube-scroll
           ref="scroll"
-          :data="AccomplishList"
+          :data="PreventList"
           :options="options"
           @pulling-down="onPullingDown"
           @pulling-up="onPullingUp"
         >
           <ul>
             <li
-              v-for="item in AccomplishList"
+              v-for="item in PreventList"
               :key="item.id"
             >
               <div class="datetime">{{getDate(item.date,'d')}}</div>
-              <div class="alltime">总训练时长：{{getTotalTime(item.Accomplished)}}</div>
+              <div class="alltime">总训练时长：{{getTotalTime(item.totaltime)}}</div>
               <ul>
                 <li
                   class="list"
@@ -67,6 +83,12 @@
           </ul>
         </cube-scroll>
       </div>
+      <div
+        class="dataTips"
+        v-else
+      >
+        {{tips}}
+      </div>
     </div>
   </cube-scroll>
 </template>
@@ -74,57 +96,84 @@
   import { Component, Prop, Vue } from "vue-property-decorator";
   import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
   import common from "../common/common";
+  import moment from "moment";
   @Component({
     components: {
       Calendar
     }
   })
   export default class PreventList extends Vue {
-    nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
-    id: string = "";
-    currentPageNo: number = 1;
-    pageSize: number = 10;
-    prescriptionDate: string | null = null;
-    AccomplishList: Accomplished.AccomplishedInstance[] = []; // 记录列表
-    AccomplishListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
-    options: any = {};
-    mounted() {
+    public nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
+    public id: string = "";
+    public currentPageNo: number = 1;
+    public pageSize: number = 10;
+    public prescriptionDate: string | null = null;
+    public PreventList: Accomplished.AccomplishedInstance[] = []; // 记录列表
+    public PreventListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
+    public options: any = {};
+    tips: string = "";
+    ishavedate: boolean = false;
+    isGetAll: boolean = true;
+    markDate: any[] = [];
+    maxPage: number = 1;
+    public mounted() {
       this.id = this.$route.params.id;
+      this.initialize();
       this.getPrenventList();
     }
     /**
      * 回到上页
      */
-    back() {
+    public back() {
       this.$store.state.isBack = true;
       this.$router.back();
     }
     // 初始化
-    initialize() {
+    public initialize() {
       this.options = {
-        pullDownRefresh: {
-          txt: "刷新成功"
-        },
+        // pullDownRefresh: true,
         pullUpLoad: {
           text: "加载成功"
         },
         scrollY: true
       };
     }
-    clickDay(data: any) {
-      console.log(this.nowDate);
-      console.log(data); // 选中某天
+    public clickDay(data: any) {
+      this.markDate = [];
+      this.isGetAll = false;
+      this.prescriptionDate = data.split("/").join("-");
+      this.currentPageNo = 1;
+      // 清空数据
+      this.PreventList = [];
+      this.PreventListResult = [];
+      this.getPrenventList();
     }
-    changeDate(data: any) {
+    public changeDate(data: any) {
       console.log(data); // 左右点击切换月份
     }
-    clickToday(data: any) {
+    public clickToday(data: any) {
       console.log(data); // 跳到了本月
+      let date = moment().format("YYYY/MM/DD");
+      console.log(date); // 跳到了本月
+      this.markDate = [];
+      (this.$refs.Calendar as Calendar).ChoseMonth(date);
+    }
+    getAll() {
+      this.markDate = [
+        { date: this.prescriptionDate, className: "clearchooseday" }
+      ];
+      this.isGetAll = true;
+      this.prescriptionDate = null;
+      this.currentPageNo = 1;
+      // 清空数据
+      this.PreventList = [];
+      this.PreventListResult = [];
+      this.getPrenventList();
     }
     /**
      * 获取预防记录列表
      */
-    getPrenventList() {
+    public getPrenventList() {
       this.$server
         .getPrenventList(
           this.id,
@@ -133,48 +182,59 @@
           this.pageSize
         )
         .then(res => {
-          this.AccomplishListResult = this.AccomplishListResult.concat(
-            res.result
-          );
-          this.AccomplishList = common.changeMsg(this.AccomplishListResult);
-          console.log(this.AccomplishList);
+          this.PreventListResult = this.PreventListResult.concat(res.result);
+          this.PreventList = common.changeMsg(this.PreventListResult);
+          console.log(this.PreventList);
+          this.maxPage = res.totalPage;
+          if (this.PreventList.length == 0) {
+            this.ishavedate = false;
+            this.tips = this.isGetAll
+              ? "暂无您的亲属的预防记录！"
+              : "您的亲属今天没有预防记录！";
+          } else {
+            this.ishavedate = true;
+          }
         });
     }
     /**
      * 下拉
      */
-    onPullingDown() {}
+    public onPullingDown() {}
     /**
      * 上拉
      */
-    onPullingUp() {}
+    public onPullingUp() {
+      if (this.maxPage > this.currentPageNo) {
+        this.currentPageNo++;
+        this.getPrenventList();
+      } else {
+        // this.PreventList = this.PreventList;
+        (this.$refs.scroll as any).forceUpdate();
+      }
+    }
     /**
      *  秒=>时分秒
      */
-    changeSEC(input: number) {
+    public changeSEC(input: number) {
       return common.changeSEC(input);
     }
     /**
      * 转换时间戳
      */
-    getDate(input: number, type: string) {
+    public getDate(input: number, type: string) {
       return common.getDate(input, type);
     }
     /**
      * 计算总时长
      */
-    getTotalTime(data: any) {
-      let result = 0;
-      for (const i in data) {
-        result += data[i].totalExerciseTime;
-      }
-      return this.changeSEC(result);
+    public getTotalTime(data: number) {
+      return this.changeSEC(data);
     }
     /**
      * 跳到预防记录详情
      * @param id:记录id
      */
-    getdetail(id: string) {
+    public getdetail(id: string) {
       this.$router.push({
         path: `/preventinfo/${id}`
       });
@@ -182,16 +242,13 @@
   }
 </script>
 <style lang='scss' scoped>
-  .accomplished {
+  .prevent {
     height: 100%;
     // overflow: hidden;
-    display: flex;
+    // display: flex;
     flex-direction: column;
-    > .header {
-    }
-    // overflow-y: scroll;
     > .scroll-list-wrap {
-      // height: 100%;
+      height: 20rem;
       flex: 1;
       ul {
         padding: 0rem 0.66rem;
@@ -248,6 +305,10 @@
           }
         }
       }
+    }
+    .dataTips {
+      margin-top: 5rem;
+      text-align: center;
     }
   }
 </style>

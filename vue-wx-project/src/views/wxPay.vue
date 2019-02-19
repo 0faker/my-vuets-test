@@ -39,7 +39,7 @@
     </div>
     <div class="shopnews">
       <div>服务内容：
-        <span v-cloak> {{order.content}}（{{order.doctor.name||''}}）</span>
+        <span v-cloak> {{order.content}}</span> <span>（{{order.doctor.name||''}}）</span>
       </div>
 
     </div>
@@ -48,9 +48,17 @@
 
 <script lang='ts'>
   import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import common from "../common/common";
+  import { SignatureObj, WeChatSignature } from "../entity/SignatureObj";
+  import wxApi from "../common/wxConfig";
+  declare var wx: any;
   @Component
   export default class WxPay extends Vue {
-    order!: Order.OrderInfo;
+    public order!: Order.OrderInfo;
+    orderId!: number;
+    openId!: number;
+    public SignatureObj?: SignatureObj; // 微信签名
+    public url: string = location.href;
     // = {
     //   id: 1000000433602663,
     //   patient: {
@@ -77,8 +85,8 @@
     //   },
     //   type: 1
     // };
-    counttime!: number;
-    time: {
+    public counttime!: number;
+    public time: {
       hour: string;
       min: string;
       sec: string;
@@ -87,13 +95,13 @@
       min: "00",
       sec: "00"
     };
-    //-ui-----
-    loadding: boolean = false;
+    // -ui-----
+    public loadding: boolean = false;
     /**
      * 监听倒计时变化页面
      */
     @Watch("counttime")
-    countimeUpdate() {
+    public countimeUpdate() {
       this.time.hour = Math.floor(this.counttime / 3600) + "";
       if (+this.time.hour < 10) {
         this.time.hour = "0" + this.time.hour;
@@ -107,19 +115,47 @@
         this.time.sec = "0" + this.time.sec;
       }
     }
-    created() {
-      this.countDown(this.order.addTime);
-      this.loadding = true;
+    public created() {
+      this.getOrder();
+      this.orderId = +this.$route.query.order_id;
+      this.getOpenid();
+    }
+    /**
+     * 获取openid
+     */
+    getOpenid() {
+      const Code: string = this.$route.query.code.toString();
+      this.$server.GetOpenid(Code).then((res: any) => {
+        this.openId = res.result;
+        this.countDown(this.order.addTime);
+        this.loadding = true;
+      });
+    }
+    /**
+     * 获取订单信息
+     */
+    getOrder() {
+      this.$server.GetOrderNews(this.orderId).then(res => {
+        this.order = res.result;
+        // 异常订单
+        if (this.order.phase != 0) {
+          {
+            this.$router.replace({
+              path: `/unusual/${this.order.phase}`
+            });
+          }
+        }
+      });
     }
     /**
      * 倒计时
      */
-    countDown(time: number) {
+    public countDown(time: number) {
       this.counttime = (time + 86400000 - new Date().getTime()) / 1000;
       if (this.counttime <= 0) {
         this.counttime = 0;
       } else {
-        let Interval = setInterval(() => {
+        const Interval = setInterval(() => {
           if (this.counttime <= 0) {
             clearInterval(Interval);
           }
@@ -130,7 +166,49 @@
     /**
      * 支付
      */
-    pay() {}
+    public pay() {
+      if (common.getPhoneType() !== "ios") {
+        this.$server.getWxConfig(this.url).then((res: WeChatSignature) => {
+          this.SignatureObj = {
+            debug: false,
+            nonceStr: res.nonceStr,
+            signature: res.signature,
+            timeStamp: res.timeStamp,
+            jsApiList: []
+          };
+          wxApi.wxConfig(this.SignatureObj);
+          this.chooseWXPay();
+        });
+      } else {
+        this.chooseWXPay();
+      }
+    }
+    /**
+     * 微信支付
+     */
+    chooseWXPay() {
+      this.$server
+        .GetWxPaySignature(this.orderId, this.openId)
+        .then((res: any) => {
+          const paySign = JSON.parse(res.result);
+          wx.chooseWXPay({
+            // appid: "wxc1755ba87a7baa57",
+            timestamp: paySign.timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+            nonceStr: paySign.nonceStr, // 支付签名随机串，不长于 32 位
+            package: paySign.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
+            signType: "MD5", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+            paySign: paySign.sign, // 支付签名
+            success: (respose: any) => {
+              // 支付成功后的回调函数
+              this.$router.push({ path: "/wxpaysuccess" });
+            },
+            fail: function(error: any) {
+              this.$router.push({ path: "/wxpayfail" });
+              //
+            }
+          });
+        });
+    }
   }
 </script>
 <style lang='scss' scoped>

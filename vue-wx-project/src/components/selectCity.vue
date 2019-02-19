@@ -8,7 +8,10 @@
           src="../assets/close.png"
           alt=""
         ></div>
-      <div class="search">
+      <div
+        class="search"
+        @click="searchCity"
+      >
         <img
           src="../assets/ic_search@2x.png"
           alt=""
@@ -20,25 +23,22 @@
     <div class="city_history">
       <h2>全国/定位/最近访问</h2>
       <div v-if="positioning">
-        <div class="national">全国</div>
-        <div class="positioning_city">南京</div>
+        <div
+          class="national"
+          @click="searchCity"
+        >全国</div>
+        <div
+          class="positioning_city"
+          @click="searchCity()"
+        >南京</div>
         <div class="last_city">南京</div>
       </div>
       <div v-else>
         <div class="national">全国</div>
-        <div class="positioning_city">南京</div>
-        <div class="last_city">南京</div>
+        <div class="positioning_fail">定位失败,点击重试</div>
       </div>
     </div>
-    <div class="match_name">
-      <ul class="result">
-        <li
-          v-for="items in matchCity"
-          @click="getCity(items.id,items.name)"
-          :key="items.id"
-        >{{items.name}}</li>
-      </ul>
-    </div>
+
     <div class="city_list">
       <cube-index-list :data="cityLists">
         <cube-index-list-group
@@ -49,7 +49,7 @@
           <cube-index-list-item
             v-for="(item, index) in group.group"
             :key="index"
-            @select="selectItem"
+            @select="chooseCity"
             :item="item"
           >
           </cube-index-list-item>
@@ -60,44 +60,46 @@
 </template>
 <script lang='ts'>
   import { Component, Prop, Vue } from "vue-property-decorator";
-  import pinyin from "pinyin";
   import ls from "local-storage";
+  import common from "../common/common";
   @Component
   export default class SelectCity extends Vue {
-    searchCityName: string | null = null;
-    isCancel: boolean = false;
-    positioning: boolean = false;
-    cityLists: any[] = [];
-    mounted() {
+    public searchCityName: string | null = null;
+    public isCancel: boolean = false;
+    public positioning: boolean = false;
+    public cityLists: any[] = [];
+    public mounted() {
       this.formattingCityLists();
     }
     /**
      * 初始化城市列表
      */
-    formattingCityLists() {
-      //循环创建a-z数组
-      let arr: any[] = [];
-      for (let i of "ABCDEFGHIJKLMNOPGRSTUVWXYZ") {
+    public formattingCityLists() {
+      // 循环创建a-z数组
+      const arr: any[] = [];
+      for (const i of "ABCDEFGHIJKLMNOPGRSTUVWXYZ") {
         arr.push({
           name: i,
           group: []
         });
       }
-      let cityList = ls.get("cityList");
+      const cityList = ls.get("cityList");
       cityList.forEach((element: any) => {
+        // element.initials = common.getInitials(element.name);
+        // console.log(new Date().getTime());
+        // // 全拼
+        // element.pinyin = common.getPinyin(element.name);
+        // console.log(new Date().getTime());
         for (let k = 0; k < arr.length; k++) {
-          //所有首字母
-          element["initials"] = this.getInitials(element.name);
-          //全拼
-          element["pinyin"] = this.getPinyin(element.name);
-
-          if (this.getInitials(element.name)[0] == arr[k].name) {
+          // 所有首字母
+          if (element.initials[0] == arr[k].name) {
             arr[k].group.push(element);
             break;
           }
         }
       });
-      let cityResult: any[] = [];
+
+      const cityResult: any[] = [];
       // 遍历arr
       arr.forEach((e: any) => {
         if (e.group.length != 0) {
@@ -110,33 +112,20 @@
     /**
      * 取消按钮
      */
-    cancel() {
+    public cancel() {
       this.$emit("cancel");
     }
-
-    getCity(id: number, name: string) {}
-    selectItem(e: any) {
+    /**
+     * 搜索城市
+     */
+    public searchCity() {
+      console.log("searchCity");
+      this.$emit("searchCity");
+    }
+    public getCity(id: number, name: string) {}
+    public chooseCity(e: any) {
       console.log(e);
-    }
-    // 获取字符串首字母
-    getInitials(str: string) {
-      //小写转大写
-      return pinyin(str, {
-        style: pinyin.STYLE_FIRST_LETTER, // 设置拼音风格首字母风格
-        heteronym: false
-      })
-        .join("")
-        .toUpperCase();
-    }
-    // 获取字符串全拼音
-    getPinyin(str: string) {
-      //小写转大写
-      return pinyin(str, {
-        style: pinyin.STYLE_NORMAL, // 设置拼音风格普通风格，即不带声调。
-        heteronym: false
-      })
-        .join("")
-        .toUpperCase();
+      this.$emit("choose-city", e.id, e.name);
     }
   }
 </script>
@@ -155,7 +144,7 @@
         height: 100%;
         background-color: #fff;
         border-radius: 0.2rem;
-        padding: 0.5rem;
+        padding: 0.3rem;
         vertical-align: middle;
         > div {
           height: 100%;
@@ -165,7 +154,7 @@
           // vertical-align: top;
         }
         > img {
-          height: 90%;
+          height: 75%;
           vertical-align: middle;
           margin: 0 0.67rem;
         }
@@ -203,6 +192,11 @@
           height: 2.67rem;
           line-height: 2.67rem;
           color: $basefontcolor2;
+          border: 1px solid #2c365d;
+        }
+        > .positioning_fail {
+          width: 62%;
+          color: $warnRed;
         }
       }
     }

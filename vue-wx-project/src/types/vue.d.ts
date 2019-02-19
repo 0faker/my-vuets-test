@@ -6,6 +6,8 @@ declare module 'vue/types/vue' {
   $common: any;
   $localStorage: any;
   $server: Server.IServer;
+  ChoseMonth: any;
+  // pinyin: pinyin.Options;
  }
  interface VueConstructor {
  }

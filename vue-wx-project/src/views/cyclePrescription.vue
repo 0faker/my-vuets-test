@@ -58,24 +58,24 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import moment from 'moment';
 import ls from 'local-storage';
 
-import doing from '../svg/recipe_ic_doing.svg';
-import done from '../svg/recipe_ic_done.svg';
-import undo from '../svg/recipe_ic_undo.svg';
+// import doing from '../svg/recipe_ic_doing.svg';
+// import done from '../svg/recipe_ic_done.svg';
+// import undo from '../svg/recipe_ic_undo.svg';
 @Component({
   components: {
-    doing,
-    done,
-    undo,
+    // doing,
+    // done,
+    // undo,
   },
 })
 export default class CyclePrescription extends Vue {
-    id: string = '';
-    cyclePrescriptions: Prescriptions.CyclePrescriptions[] = []; // 所有周期处方
-    cyclePrescription?: Prescriptions.CyclePrescriptions; // 当前处方
-    dailyPrescriptions: Prescriptions.DailyPrescriptions[] = []; // 周期处方内所有日处方
-    prescriptionTime: string = '';
-    loadding: boolean = false;
-    mounted() {
+    public id: string = '';
+    public cyclePrescriptions: Prescriptions.CyclePrescriptions[] = []; // 所有周期处方
+    public cyclePrescription?: Prescriptions.CyclePrescriptions; // 当前处方
+    public dailyPrescriptions: Prescriptions.DailyPrescriptions[] = []; // 周期处方内所有日处方
+    public prescriptionTime: string = '';
+    public loadding: boolean = false;
+    public mounted() {
     this.id = this.$route.params.id;
     console.log(this.id);
     this.getCyclePrescriptions();
@@ -84,7 +84,7 @@ export default class CyclePrescription extends Vue {
   /**
    * 回到上页
    */
-    back() {
+    public back() {
         this.$store.state.isBack = true;
         this.$router.back();
   }
@@ -92,7 +92,7 @@ export default class CyclePrescription extends Vue {
   /**
    * 获取周期处方
    */
-    getCyclePrescriptions() {
+    public getCyclePrescriptions() {
     this.cyclePrescriptions = ls.get('cyclePrescriptions');
     this.cyclePrescription = this.cyclePrescriptions.find(
       (x) => x.id === +this.id,
@@ -121,14 +121,14 @@ export default class CyclePrescription extends Vue {
   /**
    * 时间戳=>字符串
    */
-    getAddTime(input: string) {
+    public getAddTime(input: string) {
     return moment(input).format('YYYY.MM.DD');
   }
 
   /**
    * 查看日处方
    */
-    check(id: number) {
+    public check(id: number) {
     ls.set('dailyprescriptions', this.dailyPrescriptions);
     this.$router.push({ path: '/dailyprescriptions/' + id });
   }

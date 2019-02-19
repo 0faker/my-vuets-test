@@ -77,107 +77,107 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import Common from '../common/common';
-@Component
-export default class ModifyUserPhone extends Vue {
-    oldphone: string = '';
-    showPhone: string = '';
-    newphone: string = '';
-    code: string = '';
-    sendCodeMsg: string = '获取验证码';
-    isdisabled: boolean = true;
-    isSendCode: boolean = false;
-    codeWarn: string = '';
-    isSure: boolean = true;
-    codeInterval: any; // 验证码计数器
-    created() {
-    this.oldphone = this.$route.query.userphone + '';
-  }
-  /**
-   * 转换手机号334格式
-   */
-    changePhone(input: string) {
-    return Common.change(input);
-  }
-  /**
-   * 验证手机号
-   */
-    regPhone() {
-    const input: string = this.showPhone;
-    // this.$server
-    console.log(input);
-    this.showPhone = Common.change(input);
-    this.newphone = this.showPhone.replace(/\s+/g, '');
-    if (Common.regPhone(+this.newphone)) {
-      this.isdisabled = false;
-    } else {
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  import Common from "../common/common";
+  @Component
+  export default class ModifyUserPhone extends Vue {
+    public oldphone: string = "";
+    public showPhone: string = "";
+    public newphone: string = "";
+    public code: string = "";
+    public sendCodeMsg: string = "获取验证码";
+    public isdisabled: boolean = true;
+    public isSendCode: boolean = false;
+    public codeWarn: string = "";
+    public isSure: boolean = true;
+    public codeInterval: any; // 验证码计数器
+    public created() {
+      this.oldphone = this.$route.query.userphone + "";
+    }
+    /**
+     * 转换手机号334格式
+     */
+    public changePhone(input: string) {
+      return Common.change(input);
+    }
+    /**
+     * 验证手机号
+     */
+    public regPhone() {
+      const input: string = this.showPhone;
+      // this.$server
+      console.log(input);
+      this.showPhone = Common.change(input);
+      this.newphone = this.showPhone.replace(/\s+/g, "");
+      if (Common.regPhone(+this.newphone)) {
+        this.isdisabled = false;
+      } else {
+        this.isdisabled = true;
+      }
+    }
+    /**
+     * 删除输入的手机号
+     */
+    public clearInput() {
+      this.showPhone = "";
       this.isdisabled = true;
     }
-  }
-  /**
-   * 删除输入的手机号
-   */
-    clearInput() {
-    this.showPhone = '';
-    this.isdisabled = true;
-  }
-  /**
-   * 取消返回
-   */
-    cancel() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-  /**
-   * 获取验证码
-   */
-    sendCode() {
-    if (!this.isdisabled) {
-      this.$server
-        .loginTest(this.newphone)
-        .then((res: BaseEntity.BaseEntityResult) => {
-          if (res.code === 'C200') {
-            // 设置定时器
-            let index = 60;
-            // 验证码发送成功
-            this.isSendCode = true;
-            this.codeInterval = setInterval(() => {
-              this.sendCodeMsg = index + 's';
-              if (index === 0) {
-                // 验证码发送60s
-                this.isSendCode = false;
-                this.sendCodeMsg = '重新获取';
-                clearInterval(this.codeInterval);
-              }
-            }, 1000);
-          } else {
-            this.codeWarn = res.msg;
-          }
-        })
-        .catch((error) => {});
+    /**
+     * 取消返回
+     */
+    public cancel() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    /**
+     * 获取验证码
+     */
+    public sendCode() {
+      if (!this.isdisabled) {
+        this.$server
+          .loginTest(this.newphone)
+          .then((res: BaseEntity.BaseEntityResult) => {
+            if (res.code === "C200") {
+              // 设置定时器
+              let index = 60;
+              // 验证码发送成功
+              this.isSendCode = true;
+              this.codeInterval = setInterval(() => {
+                this.sendCodeMsg = index + "s";
+                if (index === 0) {
+                  // 验证码发送60s
+                  this.isSendCode = false;
+                  this.sendCodeMsg = "重新获取";
+                  clearInterval(this.codeInterval);
+                }
+              }, 1000);
+            } else {
+              this.codeWarn = res.msg;
+            }
+          })
+          .catch(error => {});
+      }
+    }
+    /**
+     * 输入验证码
+     */
+    public inputCode() {
+      this.code = this.code.replace(/\s+/g, "");
+      console.log(this.code);
+      this.isSure = this.code.length === 4 ? false : true;
+    }
+    /**
+     * 确定更改
+     */
+    public modify() {
+      this.$server.modifyUserPhone(this.newphone, this.code).then(res => {
+        if (res.code === "C200") {
+          this.$store.state.isBack = true;
+          this.$router.back();
+        }
+      });
     }
   }
-  /**
-   * 输入验证码
-   */
-    inputCode() {
-    this.code = this.code.replace(/\s+/g, '');
-    console.log(this.code);
-    this.isSure = this.code.length === 4 ? false : true;
-  }
-  /**
-   * 确定更改
-   */
-    modify() {
-    this.$server.modifyUserPhone(this.newphone, this.code).then((res) => {
-      if (res.code === 'C200') {
-        this.$store.state.isBack = true;
-        this.$router.back();
-      }
-    });
-  }
-}
 </script>
 <style lang='scss' scoped>
   .modifyPhone {

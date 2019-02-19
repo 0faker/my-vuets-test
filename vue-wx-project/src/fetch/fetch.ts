@@ -2,14 +2,15 @@
  * 后台请求设置
  */
 import axios from 'axios';
+import ls from 'local-storage'
 // import { serverUrl } from './configByEnv.js'
-const Authorization = 'xxbearer:eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjE3MzI3ODgwNjc1IiwiZXhwIjoxNTUwNjI4NjQ5fQ.mq8b8JUNRn6bQVpj2E99xw9R3uGEqSVylJamW-LxiL0v3Uin_h1MCX5lJ-Wk1jVK_BVxESReSSGCyCWPmahW0Q';
-
+const Authorization = 'xxbearer:eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjE3MzI3ODgwNjc1IiwiZXhwIjoxNTUzMDQ3ODM1fQ.76Q4r80bXFL5OKBd75QgIrqZAl7g0Om7DSNjlK8Lsgy-AfYxhB-F2aSwNuuvSrtPLAa40a5K--UVm9wnUsOHDw';
+// const Authorization = ls.get('Authorization');
 axios.defaults.headers = {
   Authorization,
 };
 // axios.defaults.baseURL = serverUrl;
-axios.defaults.baseURL = '/wx/server';
+axios.defaults.baseURL = '/ppay/testserver';
 
 axios.interceptors.request.use((config) => {
   return config;
@@ -20,7 +21,8 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use((response) => {
   const code = response.data.code;
   if (code === 'C700') {
-    alert('登录信息失效'); location.href = '/wx/login'; return;
+    alert('登录信息失效');
+    //  location.href = '/wx/login'; return;
   }
   return response.data;
 }, (error) => {
@@ -37,7 +39,7 @@ class Server implements Server.IServer {
    * 登录
    * @param curSlnId
    */
-  login(option: any): Promise<any> {
+  public login(option: any): Promise<any> {
     return axios({
       url: 'cp/auth/regist_patient_with_wx',
       method: 'post',
@@ -59,7 +61,7 @@ class Server implements Server.IServer {
   /**
    * 登录第一步
    */
-  getAuth(option: any): Promise<any> {
+  public getAuth(option: any): Promise<any> {
     return axios({
       url: 'cp/auth/get_patient_info_from_wx',
       method: 'post',
@@ -79,10 +81,10 @@ class Server implements Server.IServer {
     });
   }
   /**
- * 登录获取验证码
- * @param {*} option
- */
-  loginTest(phone: string): Promise<any> {
+   * 登录获取验证码
+   * @param {*} option
+   */
+  public loginTest(phone: string): Promise<any> {
     return axios({
       url: 'cp/family/get_auth_code',
       params: {
@@ -91,10 +93,10 @@ class Server implements Server.IServer {
     });
   }
   /**
- * 获取用户信息
- * @param {*} id
- */
-  getUser(id: string): Promise<any> {
+   * 获取用户信息
+   * @param {*} id
+   */
+  public getUser(id: string): Promise<any> {
     return axios({
       url: 'cp/ep/patient/' + id,
       method: 'get',
@@ -107,7 +109,7 @@ class Server implements Server.IServer {
    * 获取亲属列表
    * @param id
    */
-  getPatient(id: string): Promise<any> {
+  public getPatient(id: string): Promise<any> {
     return axios({
       url: 'cp/family/' + id + '/binding_list',
       method: 'get',
@@ -118,7 +120,7 @@ class Server implements Server.IServer {
    * @param {*} id 用户id
    * @param {*} patientId 解绑的患者id
   */
-  delPaitient(id: number, patientId: number): Promise<any> {
+  public delPaitient(id: number, patientId: number): Promise<any> {
     return axios({
       url: 'cp/family/' + id + '/unbind',
       method: 'put',
@@ -131,7 +133,7 @@ class Server implements Server.IServer {
    * 获取微信签名
    * @param {*} url 页面地址
    */
-  getWxConfig(url: string): Promise<any> {
+  public getWxConfig(url: string): Promise<any> {
     return axios({
       url: 'cp/ep/wechat/signature',
       params: {
@@ -144,7 +146,7 @@ class Server implements Server.IServer {
  * @param {*} id:用户id
  * @param {*} phoen:添加的患者手机号
  */
-  AddAutoCode(id: string, phone: number): Promise<any> {
+  public AddAutoCode(id: string, phone: number): Promise<any> {
     return axios({
       url: 'cp/family/' + id + '/get_auth_code',
       params: {
@@ -158,7 +160,7 @@ class Server implements Server.IServer {
    * @param phone 要绑定的患者的手机号
    * @param authCode 验证码
    */
-  bindFamily(id: number, phone: string, authCode: string): Promise<any> {
+  public bindFamily(id: number, phone: string, authCode: string): Promise<any> {
     return axios({
       url: 'cp/family/' + id + '/binding',
       method: 'post',
@@ -169,6 +171,19 @@ class Server implements Server.IServer {
     });
   }
   /**
+ * 
+ * @param {*} option 
+ */
+  public addPaitienQRcode(userid: number, qrcode: any): Promise<any> {
+    return axios({
+      url: "cp/family/" + userid + "/qrcode_binding",
+      data: {
+        qrcode
+      },
+      method: 'post',
+    })
+  }
+  /**
    * 修改用户信息
    * @param id 用户id
    * @param name
@@ -177,7 +192,7 @@ class Server implements Server.IServer {
    * @param height
    * @param weight
    */
-  modify(id: string, name: string | null, sex: string | null, birthday: string | null, height: number | null, weight: number | null): Promise<any> {
+  public modify(id: string, name: string | null, sex: string | null, birthday: string | null, height: number | null, weight: number | null): Promise<any> {
     return axios({
       url: '/cp/ep/patient/' + id,
       method: 'put',
@@ -195,7 +210,7 @@ class Server implements Server.IServer {
    * @param phone 新手机号
    * @param code 验证码
    */
-  modifyUserPhone(phone: string, code: string): Promise<any> {
+  public modifyUserPhone(phone: string, code: string): Promise<any> {
     return axios(
       {
         url: 'cp/auths/update_patient_phone',
@@ -228,7 +243,7 @@ class Server implements Server.IServer {
    * 获取患者所有周期处方
    * @param id 患者id
    */
-  getCyclePrescriptions(id: number): Promise<any> {
+  public getCyclePrescriptions(id: number): Promise<any> {
     return axios({
       url: '/cp/ep/patient/' + id + '/cycle_prescriptions',
     });
@@ -237,7 +252,7 @@ class Server implements Server.IServer {
    * 获取康复报告列表
    * @param id 患者id
    */
-  getReportLists(id: number): Promise<any> {
+  public getReportLists(id: number): Promise<any> {
     return axios({
       url: '/cp/patient/' + id + '/recovery_report_list',
       params: {
@@ -250,7 +265,7 @@ class Server implements Server.IServer {
    * 获取康复报告
    * @param id 报告id
    */
-  getReportInfo(id: string, recoveryReportId: string): Promise<any> {
+  public getReportInfo(id: string, recoveryReportId: string): Promise<any> {
     return axios({
       url: '/cp/patient/' + id + '/recovery_report_info',
       params: {
@@ -265,7 +280,7 @@ class Server implements Server.IServer {
    * @param currentPageNo 当前页数
    * @param pageSize 每页条数
    */
-  getAccomplishedList(id: string, prescriptionDate: string, currentPageNo: number, pageSize: number): Promise<any> {
+  public getAccomplishedList(id: string, prescriptionDate: string, currentPageNo: number, pageSize: number): Promise<any> {
     return axios({
       url: 'cp/patient/' + id + '/accomplished_info_list',
       params: {
@@ -277,10 +292,10 @@ class Server implements Server.IServer {
   }
   /**
    * 康复记录详情
-   * @param patientid 
-   * @param recordid 
+   * @param patientid
+   * @param recordid
    */
-  getAccomplishedInfo(patientid: string, recordid: string): Promise<any> {
+  public getAccomplishedInfo(patientid: string, recordid: string): Promise<any> {
     return axios({
       url: 'cp/patient/' + patientid + '/accomplished_info/' + recordid,
     });
@@ -289,7 +304,7 @@ class Server implements Server.IServer {
    * 康复记录的日处方
    * @param id   康复记录id
    */
-  getAccomplishedPrescription(id: string): Promise<any> {
+  public getAccomplishedPrescription(id: string): Promise<any> {
     return axios({
       url: 'cp/ep/prescription_accomplished_info/' + id + '/corresponding_daily_prescription'
       ,
@@ -302,7 +317,7 @@ class Server implements Server.IServer {
   * @param currentPage 当前页数
   * @param pageSize 每页条数
   */
-  getPrenventList(id: string, date: string, currentPage: number, pageSize: number): Promise<any> {
+  public getPrenventList(id: string, date: string, currentPage: number, pageSize: number): Promise<any> {
     return axios({
       url: 'cp/ep/patient/' + id + '/preventive_records',
       params: {
@@ -312,7 +327,7 @@ class Server implements Server.IServer {
       },
     });
   }
-  getPreventiveInfo(id: string): Promise<any> {
+  public getPreventiveInfo(id: string): Promise<any> {
     return axios({
       url: 'cp/ep/patient/preventive_record/' + id,
     });
@@ -324,7 +339,7 @@ class Server implements Server.IServer {
   * @param currentPage 当前页数
   * @param pageSize 每页条数
   */
-  getMonitortList(id: string, date: string, currentPage: number, pageSize: number): Promise<any> {
+  public getMonitortList(id: string, date: string, currentPage: number, pageSize: number): Promise<any> {
     return axios({
       url: 'cp/ep/patient/' + id + '/self_monitoring_records',
       params: {
@@ -334,7 +349,7 @@ class Server implements Server.IServer {
       },
     });
   }
-  getMonitorInfo(id: String): Promise<any> {
+  public getMonitorInfo(id: String): Promise<any> {
     return axios({
       url: 'cp/ep/patient/self_monitoring_record/' + id,
 
@@ -347,7 +362,7 @@ class Server implements Server.IServer {
   * @param currentPage 当前页数
   * @param pageSize 每页条数
   */
-  getAssessmentList(id: string, date: string, currentPage: number, pageSize: number): Promise<any> {
+  public getAssessmentList(id: string, date: string, currentPage: number, pageSize: number): Promise<any> {
     return axios({
       url: 'cp/ep/patient/' + id + '/simple_assessments',
       params: {
@@ -359,15 +374,15 @@ class Server implements Server.IServer {
   }
   /**
    * 获取评估详情
-   * @param id 
+   * @param id
    */
-  getAssessmentInfo(id: string): Promise<any> {
+  public getAssessmentInfo(id: string): Promise<any> {
     return axios({
       url: 'cp/ep/patient/simple_assessments/' + id,
-    })
+    });
   }
 
-  getBorg(): Promise<any> {
+  public getBorg(): Promise<any> {
     return axios({
       url: '/cp/patient/borg_category_list',
     });
@@ -376,64 +391,158 @@ class Server implements Server.IServer {
    * 获取购买的患者是否已存在
    * @param phone 手机号
    */
-  getPayPatient(phone: number): Promise<any> {
+  public getPayPatient(phone: number): Promise<any> {
     return axios({
-      url: "/cp/ep/patient/" + phone + "/wx",
+      url: '/cp/ep/patient/' + phone + '/wx',
     });
   }
   /**
    * 购买时注册用户
-   * @param phone 
-   * @param code 
+   * @param phone
+   * @param code
    */
-  RegistPatient(phone: string, code: string): Promise<any> {
+  public RegistPatient(phone: string, code: string): Promise<any> {
     return axios({
-      url: "/cp/ep/wx/register_patient",
+      url: '/cp/ep/wx/register_patient',
       params: {
-        phone, code
+        phone, code,
       },
-      method: "post",
-    })
+      method: 'post',
+    });
   }
   /**
  * 获取专家医生服务
- * @param {*} option 
+ * @param {*} option
  */
-  GetCommonDoctorService(id: number, patientid: number): Promise<any> {
+  public GetCommonDoctorService(id: number, patientId: number): Promise<any> {
     return axios({
-      url: "/cp/ep/product/common_doctor_service",
+      url: '/cp/ep/product/common_doctor_service',
       params: {
         doctorId: id,
-        patientId: patientid,
-        version: '2.4.2'
-      }
-    })
+        version: '2.4.2',
+        patientId,
+      },
+    });
   }
   /**
    * 获取城市的医生服务
-   * @param cityId 
-   * @param name 
-   * @param pageSize 
-   * @param currentPage 
+   * @param cityId ;
+   * @param name ;
+   * @param pageSize ;
+   * @param currentPage ;
    */
-  GetCityDoctors(cityId: number, name: string, pageSize: number, currentPage: number): Promise<any> {
+  public GetCityDoctors(pageSize: number, currentPage: number, cityId?: number, name?: string): Promise<any> {
     return axios({
-      url: "cp/ep/city/doctors",
+      url: 'cp/ep/city/doctors',
       params: {
-        cityId, name, pageSize, currentPage
-      }
-    })
+        cityId, name, pageSize, currentPage,
+      },
+    });
   }
   /**
  * 获取城市列表
- * @param {*} option 
+ * @param {*} option
  */
-  GetCityLists(): Promise<any> {
+  public GetCityLists(): Promise<any> {
     return axios({
-      url: "/cp/ep/cities",
+      url: '/cp/ep/cities',
+    });
+  }
+  /**
+   * 三分钟心电记录列表
+   * @param monitoringRecordId 自主监测记录id
+   */
+  public GetThreeMinutesRecords(monitoringRecordId: number): Promise<any> {
+    return axios({
+      url: '/cp/ep/patient/1/three_minutes_records',
+      params: {
+        monitoringRecordId,
+      },
+    });
+  }
+  /**
+   * 三分钟分析结果
+   * @param {*} id 三分纪录id
+   */
+  public GetAnalysisResult(id: number): Promise<any> {
+    return axios({
+      url: '/cp/ep/three_minutes_record/' + id + '/analysis_result',
+    });
+  }
+  /**
+   * 获取sts签名
+   */
+  public GetStsTicket(): Promise<any> {
+    return axios({
+      url: '/cp/ep/patient/sts_token',
+    });
+  }
+  /**
+   * 获取微信支付签名
+   * @param orderId 订单号
+   * @param ip 用户ip
+   * @param payType 支付方式
+   * @param openId 微信openId
+   */
+  public GetWxPaySignature(orderId: number, openId: number): Promise<any> {
+    return axios({
+      url: 'cp/ep/order/' + orderId + '/pub_pre_pay',
+      method: "post",
+      params: {
+        orderId,
+        openId,
+        'payType': 3,
+        'ip': '127.0.0.1',
+      }
+    });
+  }
+  /**
+   * 获取openid
+   */
+  public GetOpenid(code: string): Promise<any> {
+    return axios({
+      url: 'cp/ep/order/openid',
+      params: {
+        code
+      }
+    });
+  }
+  /**
+   * 获取订单详情
+   * @param {*} id 三分纪录id
+   */
+  public GetOrderNews(id: number): Promise<any> {
+    return axios({
+      url: '/cp/ep/three_minutes_record/' + id + '/analysis_result',
+    });
+  }
+  /**
+   * 生成订单
+   * @param productId 服务id
+   * @param doctorId  医生id
+   * @param patientId 患者id
+   */
+  public GetPayOrder(
+    productId: number,
+    doctorId: number,
+    patientId: number): Promise<any> {
+    return axios({
+      url: "/cp/ep/order",
+      method: "post",
+      data: {
+        productId: productId.toString(),
+        doctorId,
+        patientId
+      },
+      transformRequest: [function (data) {
+        var formData = new FormData();
+        for (let key in data) {
+          formData.append(key, data[key]);
+        }
+        return formData
+      }],
     })
   }
-
 }
 
 export default new Server();

@@ -1,4 +1,4 @@
-declare module Prevent {
+declare namespace Prevent {
  export interface PreventInfo {
   preventiveScheme: any;
   startTime: number;
@@ -29,6 +29,6 @@ declare module Prevent {
   platformType: number;
  }
  export class preventRecordResult {
-  result: PreventInfo;
+  public result: PreventInfo;
  }
 }

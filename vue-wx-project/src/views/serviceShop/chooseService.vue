@@ -26,9 +26,9 @@
         >
           <div
             class="currentCity"
-            @click="chooseCity"
+            @click="showChooseCity"
           >
-            {{showCity}}
+            {{currentCityName}}
           </div>
           <div class="img"> <img
               src="../../assets/ic_city_pick.png"
@@ -51,14 +51,32 @@
     </div>
 
     <div class="service">
-      <service-list></service-list>
+      <service-list
+        :doctor-service="doctorServiceLists"
+        @PullingUp='onPullingUp'
+        :isPullingUp='isPullingUp'
+      ></service-list>
+    </div>
+    <div
+      class="city_select"
+      v-if="showSelectCity"
+    >
+      <select-city
+        @cancel='cancelselectCity'
+        @searchCity='searchCity'
+        @choose-city='chooseCity'
+      ></select-city>
     </div>
     <div
       class="city_search"
       v-if="showSearchCity"
     >
-      <select-city @cancel='cancelCity'></select-city>
+      <search-city
+        @cancel='cancelSearchCity'
+        @choose-city='chooseCity'
+      ></search-city>
     </div>
+
   </div>
 </template>
 <script lang='ts'>
@@ -66,40 +84,79 @@
   import ls from "local-storage";
   import ServiceList from "../../components/serviceList.vue";
   import SelectCity from "../../components/selectCity.vue";
+  import SearchCity from "../../components/searchCity.vue";
+  import common from "../../common/common";
   @Component({
     components: {
       ServiceList,
-      SelectCity
+      SelectCity,
+      SearchCity
     }
   })
   // 选择服务商品
   export default class ChooseService extends Vue {
-    patientId: string = "";
-    showCity: string = "定位中";
-    showSearchCity: boolean = false;
-    cityLists: {
+    public patientId: string = "";
+    public doctorServiceLists: any[] = [];
+    public showSearchCity: boolean = false;
+    public showSelectCity: boolean = false;
+    public currentCityName: string = ""; // 当前选择的城市
+    public currentCityId?: number; // 当前选择的城市
+    public positioningCity: string = ""; // 定位的城市
+    public pageSize: number = 20;
+    public currentPage: number = 1;
+    maxPage: number = 1; //医生列表最大页数
+    isPullingUp: boolean = true; //是否下拉刷新
+    public cityLists: Array<{
       id: number;
       name: string;
-    }[] = [];
-    created() {
+    }> = [];
+    public created() {
       this.patientId = ls.get("payPatient");
+
+      // 赋值当前城市为sessionStorage中城市
+      this.currentCityName = sessionStorage.getItem("currentCityName") || "";
+      if (this.currentCityName) {
+        // 不定位
+      } else {
+        // 定位
+        this.positioningCity = "南京";
+        this.currentCityName = this.positioningCity;
+      }
       this.getCitys();
+      this.getDoctorService();
+    }
+    /**
+     * 获取全部医生服务
+     */
+    public getDoctorService() {
+      this.$server
+        .GetCityDoctors(this.pageSize, this.currentPage, this.currentCityId)
+        .then(data => {
+          this.doctorServiceLists = this.doctorServiceLists.concat(data.result);
+          this.maxPage = data.totalPage;
+        });
     }
     /**
      * 回到上页
      */
-    back() {
+    public back() {
       this.$store.state.isBack = true;
       this.$router.back();
     }
     /**
      * 获取有医生的城市lists
      */
-    getCitys() {
+    public getCitys() {
       this.$server
         .GetCityLists()
         .then(data => {
           this.cityLists = data.result;
+          this.cityLists.forEach((element: any) => {
+            // 所有首字母
+            element.initials = common.getInitials(element.name);
+            // 全拼
+            element.pinyin = common.getPinyin(element.name);
+          });
           ls.set("cityList", this.cityLists);
         })
         .catch();
@@ -107,21 +164,59 @@
     /**
      * 选择城市
      */
-    chooseCity() {
-      this.showSearchCity = true;
-      // this.$router.push({ path: "searchdoctor" });
+    public chooseCity(cityId: number, cityName: string) {
+      this.showSearchCity = false;
+      this.showSelectCity = false;
+      sessionStorage.setItem("currentCityName", cityName);
+      this.currentCityName = cityName;
+      console.log("cityId");
+      console.log(cityId);
+      this.doctorServiceLists = [];
+      this.currentCityId = cityId;
+      this.getDoctorService();
     }
     /**
-     * 去搜索
+     *显示搜索
      */
-    search() {
+    public showChooseCity() {
+      this.showSelectCity = true;
+    }
+    /**
+     * 去搜索医生
+     */
+    public search() {
       this.$router.push({ path: "searchdoctor" });
     }
     /**
-     * 关闭城市搜索
+     * 显示搜索
      */
-    cancelCity() {
+    public searchCity() {
+      this.showSearchCity = true;
+      this.showSelectCity = false;
+    }
+
+    public cancelSearchCity() {
       this.showSearchCity = false;
+      this.showSelectCity = false;
+    }
+    /**
+     * 关闭城市选择
+     */
+    public cancelselectCity() {
+      this.showSelectCity = false;
+      this.showSearchCity = false;
+    }
+    /**
+     * 上拉
+     */
+    onPullingUp() {
+      console.log("PullingUp");
+      if (this.currentPage < this.maxPage) {
+        this.currentPage++;
+        this.getDoctorService();
+      } else {
+        this.isPullingUp = false;
+      }
     }
   }
 </script>
@@ -149,6 +244,7 @@
 
           > .currentCity {
             height: 100%;
+            text-align: center;
             overflow: hidden; //超出一行文字自动隐藏
             text-overflow: ellipsis; //文字隐藏后添加省略号
             white-space: nowrap; //强制不换行
@@ -176,7 +272,7 @@
             text-align: center;
             font-size: 1.25rem;
             // height: 100%;
-            line-height: inherit;
+            line-height: 2.25rem;
             > .searchIcon {
               height: 1.25rem;
             }
@@ -191,7 +287,8 @@
       overflow: scroll;
       // margin-top: -8rem;
     }
-    > .city_search {
+    > .city_search,
+    > .city_select {
       background-color: #f7f7f7;
       width: 100%;
       height: 100%;

@@ -1,139 +1,182 @@
 <template>
-  <cube-scroll
-    ref="scroll1"
-    class="scroll-list-outer-wrap"
-  >
-    <div class="accomplished">
-      <div class="header">
-        <div
-          class="back"
-          @click="back"
+
+  <div class="monitor">
+    <div class="header">
+      <div
+        class="back"
+        @click="back"
+      >
+        <img
+          src="../assets/back.png"
+          alt=""
+          srcset=""
         >
-          <img
-            src="../assets/back.png"
-            alt=""
-            srcset=""
-          >
-        </div>
-        <div class="title">
-          监测记录
-        </div>
-        <div class="header-r">
-          回到当天
-        </div>
       </div>
-      <!--  
+      <div class="title">
+        监测记录
+      </div>
+      <div
+        v-if="isGetAll"
+        class="header-r"
+        @click="clickToday"
+      >
+        回到当天
+      </div>
+      <div
+        v-else
+        class="header-r"
+        @click="getAll"
+      >
+        全部
+      </div>
+    </div>
+    <!--  
   :agoDayHide='1514937600'//某个日期以前的不允许点击  时间戳10位
   :futureDayHide='1525104000' //某个日期以后的不允许点击  时间戳10位
   -->
-      <calendar
-        @choseDay="clickDay"
-        @changeMonth="changeDate"
-        :futureDayHide='nowDate'
-        :topText="['周日','周一', '周二', '周三', '周四', '周五', '周六']"
-      ></calendar>
-      <!-- <div>
+    <calendar
+      ref="Calendar"
+      @choseDay="clickDay"
+      @changeMonth="changeDate"
+      :futureDayHide='nowDate'
+      :topText="['周日','周一', '周二', '周三', '周四', '周五', '周六']"
+      :markDateMore="markDate"
+    ></calendar>
+    <!-- <div>
       收起日历
     </div> -->
-      <div class="scroll-list-wrap">
-        <cube-scroll
-          ref="scroll"
-          :data="AccomplishList"
-          :options="options"
-          @pulling-down="onPullingDown"
-          @pulling-up="onPullingUp"
-        >
-          <ul>
-            <li
-              v-for="item in AccomplishList"
-              :key="item.id"
-            >
-              <div class="datetime">{{getDate(item.date,'d')}}</div>
-              <ul>
-                <li
-                  class="list"
-                  v-for="item1 in item.objectList"
-                  :key="item1.id"
-                  @click="getdetail(item1.id)"
+    <div
+      class="scroll-list-wrap"
+      v-if="ishavedate"
+    >
+      <cube-scroll
+        ref="scroll"
+        :data="MonitorList"
+        :options="options"
+        @pulling-down="onPullingDown"
+        @pulling-up="onPullingUp"
+      >
+        <ul>
+          <li
+            v-for="item in MonitorList"
+            :key="item.id"
+          >
+            <div class="datetime">{{getDate(item.date,'d')}}</div>
+            <ul>
+              <li
+                class="list"
+                v-for="item1 in item.objectList"
+                :key="item1.id"
+                @click="getdetail(item1.id)"
+              >
+                <div class="list-t">
+                  <span class="list-l">{{getDate(item1.startTime,'hms')}}-{{getDate(item1.endTime,"hms")}}</span>
+                  <span class="list-r"> {{changeSEC(item1.totalExerciseTime)}}</span>
+                </div>
+                <div
+                  class="threeM"
+                  v-for="item2 in item.threeMinutesEcgRecordList"
+                  :key="item2.id"
+                  @click.stop="feedback(item2.id,item2.status)"
                 >
-                  <div class="list-t">
-                    <span class="list-l">{{getDate(item1.startTime,'hms')}}-{{getDate(item1.endTime,"hms")}}</span>
-                    <span class="list-r"> {{changeSEC(item1.totalExerciseTime)}}</span>
+                  <div>
+                    <span class="list-l">3分钟</span><span class="list-r">{{getDate(item2.startTime,'hms')}}-{{getDate(item2.endTime,'hms')}}</span>
                   </div>
-                  <div
-                    class="threeM"
-                    v-for="item2 in item.threeMinutesEcgRecordList"
-                    :key="item2.id"
-                    @click.stop="feedback(item2.id,item2.status)"
-                  >
-                    <div>
-                      <span class="list-l">3分钟</span><span class="list-r">{{getDate(item2.startTime,'hms')}}-{{getDate(item2.endTime,'hms')}}</span>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </cube-scroll>
-      </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </cube-scroll>
     </div>
-  </cube-scroll>
+    <div
+      class="dataTips"
+      v-else
+    >
+      {{tips}}
+    </div>
+  </div>
 </template>
 <script lang='ts'>
   import { Component, Prop, Vue } from "vue-property-decorator";
   import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
   import common from "../common/common";
+  import moment from "moment";
   @Component({
     components: {
       Calendar
     }
   })
   export default class MonitorList extends Vue {
-    nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
-    id: string = "";
-    currentPageNo: number = 1;
-    pageSize: number = 10;
-    prescriptionDate: string | null = null;
-    AccomplishList: Accomplished.AccomplishedInstance[] = []; // 记录列表
-    AccomplishListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
-    options: any = {};
-    mounted() {
+    public nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
+    public id: string = "";
+    public currentPageNo: number = 1;
+    public pageSize: number = 50;
+    public prescriptionDate: string | null = null;
+    public MonitorList: Accomplished.AccomplishedInstance[] = []; // 记录列表
+    public MonitorListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
+    public options: any = {};
+    tips: string = "";
+    ishavedate: boolean = false;
+    isGetAll: boolean = true;
+    markDate: any[] = [];
+    maxPage: number = 1;
+    public mounted() {
       this.id = this.$route.params.id;
-      this.getPrenventList();
+      this.initialize();
+      this.getMonitortList();
     }
     /**
      * 回到上页
      */
-    back() {
+    public back() {
       this.$store.state.isBack = true;
       this.$router.back();
     }
     // 初始化
-    initialize() {
+    public initialize() {
       this.options = {
-        pullDownRefresh: {
-          txt: "刷新成功"
-        },
+        // pullDownRefresh: true,
         pullUpLoad: {
           text: "加载成功"
         },
         scrollY: true
       };
     }
-    clickDay(data: any) {
-      console.log(this.nowDate);
-      console.log(data); // 选中某天
+    public clickDay(data: any) {
+      this.markDate = [];
+      this.isGetAll = false;
+      this.prescriptionDate = data.split("/").join("-");
+      this.currentPageNo = 1;
+      // 清空数据
+      this.MonitorList = [];
+      this.MonitorListResult = [];
+      this.getMonitortList();
     }
-    changeDate(data: any) {
+    public changeDate(data: any) {
       console.log(data); // 左右点击切换月份
     }
-    clickToday(data: any) {
-      console.log(data); // 跳到了本月
+    public clickToday(data: any) {
+      let date = moment().format("YYYY/MM/DD");
+      this.markDate = [];
+      (this.$refs.Calendar as Calendar).ChoseMonth(date);
+    }
+    getAll() {
+      this.markDate = [
+        { date: this.prescriptionDate, className: "clearchooseday" }
+      ];
+      this.isGetAll = true;
+      this.prescriptionDate = null;
+      this.currentPageNo = 1;
+      // 清空数据
+      this.MonitorList = [];
+      this.MonitorListResult = [];
+      this.getMonitortList();
     }
     /**
      * 评价记录列表
      */
-    getPrenventList() {
+    public getMonitortList() {
       this.$server
         .getMonitortList(
           this.id,
@@ -142,37 +185,53 @@
           this.pageSize
         )
         .then(res => {
-          this.AccomplishListResult = this.AccomplishListResult.concat(
-            res.result
-          );
-          this.AccomplishList = common.changeMsg(this.AccomplishListResult);
-          console.log(this.AccomplishList);
+          this.MonitorListResult = this.MonitorListResult.concat(res.result);
+          this.MonitorList = common.changeMsg(this.MonitorListResult);
+          console.log(this.MonitorList);
+          this.maxPage = res.totalPage;
+          if (this.MonitorList.length == 0) {
+            this.ishavedate = false;
+            this.tips = this.isGetAll
+              ? "暂无您的亲属的监测记录！"
+              : "您的亲属今天没有监测记录！";
+            console.log(this.tips);
+          } else {
+            this.ishavedate = true;
+          }
         });
     }
     /**
      * 下拉
      */
-    onPullingDown() {}
+    public onPullingDown() {}
     /**
      * 上拉
      */
-    onPullingUp() {}
+    public onPullingUp() {
+      if (this.maxPage > this.currentPageNo) {
+        this.currentPageNo++;
+        this.getMonitortList();
+      } else {
+        // this.PreventList = this.PreventList;
+        (this.$refs.scroll as any).forceUpdate();
+      }
+    }
     /**
      *  秒=>时分秒
      */
-    changeSEC(input: number) {
+    public changeSEC(input: number) {
       return common.changeSEC(input);
     }
     /**
      * 转换时间戳
      */
-    getDate(input: number, type: string) {
+    public getDate(input: number, type: string) {
       return common.getDate(input, type);
     }
     /**
      * 计算总时长
      */
-    getTotalTime(data: any) {
+    public getTotalTime(data: any) {
       let result = 0;
       for (const i in data) {
         result += data[i].totalExerciseTime;
@@ -183,7 +242,7 @@
      * 跳到监测详情
      * @param id:记录id
      */
-    getdetail(id: string) {
+    public getdetail(id: string) {
       this.$router.push({
         path: `/monitorinfo/${id}`
       });
@@ -191,17 +250,17 @@
   }
 </script>
 <style lang='scss' scoped>
-  .accomplished {
+  .monitor {
     height: 100%;
     // overflow: hidden;
-    display: flex;
+    // display: flex;
     flex-direction: column;
-    > .header {
-    }
+
     // overflow-y: scroll;
     > .scroll-list-wrap {
+      height: 20rem;
       // height: 100%;
-      flex: 1;
+      // flex: 1;
       ul {
         padding: 0rem 0.66rem;
         background-color: #f3f3f3;
@@ -291,6 +350,10 @@
           }
         }
       }
+    }
+    .dataTips {
+      margin-top: 5rem;
+      text-align: center;
     }
   }
 </style>

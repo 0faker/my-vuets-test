@@ -77,81 +77,85 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import ls from "local-storage";
-  import common from "../../common/common";
-  @Component
-  export default class SearchDoctor extends Vue {
-    searchDoctorName: string | null = null; //搜索的医生姓名
-    doctorHistory: string[] = []; //搜索的医生姓名历史
-    isCancel: boolean = false;
-    showSearchTap: any;
-    mounted() {
-      this.doctorHistory = ls.get("doctorHistory") || [];
-    }
-    /**
-     * 取消按钮 回退
-     */
-    back() {}
-    /**
-     * 清空搜索文字
-     */
-    clear() {
-      this.searchDoctorName = null;
-      this.isCancel = false;
-    }
-    /**
-     * 搜索
-     */
-    searchdoctor() {
-      if (this.searchDoctorName) {
-        console.log(this.searchDoctorName);
-        // 加入历史纪录数组中首位
-        this.doctorHistory.unshift(this.searchDoctorName);
-        // 去重
-        this.doctorHistory = common.deleteRepeat(this.doctorHistory);
-        // 保存至localstorage
-        ls.set("doctorHistory", this.doctorHistory);
-        this.$router.push({
-          path: "matchdoctor",
-          params: {
-            doctor: this.searchDoctorName
-          }
-        });
-      }
-    }
-    /**
-     * 输入
-     */
-    oninput(e: any) {
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import ls from 'local-storage';
+import common from '../../common/common';
+@Component
+export default class SearchDoctor extends Vue {
+  public searchDoctorName: string | null = null; // 搜索的医生姓名
+  public doctorHistory: string[] = []; // 搜索的医生姓名历史
+  public isCancel: boolean = false;
+  public showSearchTap: any;
+  public mounted() {
+    this.doctorHistory = ls.get('doctorHistory') || [];
+  }
+  /**
+   * 回到上页
+   */
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
+  }
+  /**
+   * 清空搜索文字
+   */
+  public clear() {
+    this.searchDoctorName = null;
+    this.isCancel = false;
+  }
+  /**
+   * 搜索
+   */
+  public searchdoctor() {
+    if (this.searchDoctorName) {
       console.log(this.searchDoctorName);
-      this.searchDoctorName = e.target.value.replace(/^\s+|\s+$/g, "");
-      if (this.searchDoctorName) {
-        this.isCancel = true;
-      } else {
-        this.isCancel = false;
-      }
-    }
-    /**
-     * 点击历史医生
-     */
-    searchHistorydoctor(doctorName: string) {
-      this.searchDoctorName = doctorName;
+      // 加入历史纪录数组中首位
+      this.doctorHistory.unshift(this.searchDoctorName);
+      // 去重
+      this.doctorHistory = common.deleteRepeat(this.doctorHistory);
+      // 保存至localstorage
+      ls.set('doctorHistory', this.doctorHistory);
       this.$router.push({
-        path: "matchdoctor",
+        path: 'matchdoctor',
         query: {
-          doctor: this.searchDoctorName
-        }
+          doctor: this.searchDoctorName,
+        },
       });
     }
-    /**
-     * 清空搜索历史
-     */
-    clearHistory() {
-      this.doctorHistory = [];
-      ls.remove("doctorHistory");
+  }
+  /**
+   * 输入
+   */
+  public oninput(e: any) {
+    console.log(this.searchDoctorName);
+    this.searchDoctorName = e.target.value.replace(/^\s+|\s+$/g, '');
+    if (this.searchDoctorName) {
+      this.isCancel = true;
+    } else {
+      this.isCancel = false;
     }
   }
+  /**
+   * 点击历史医生
+   */
+  public searchHistorydoctor(doctorName: string) {
+    this.searchDoctorName = doctorName;
+    console.log(doctorName);
+    this.$router.push({
+      path: 'matchdoctor',
+      query: {
+        doctor: this.searchDoctorName,
+      },
+    });
+  }
+  /**
+   * 清空搜索历史
+   */
+  public clearHistory() {
+    this.doctorHistory = [];
+    ls.remove('doctorHistory');
+  }
+}
 </script>
 <style lang='scss' scoped>
   .search_doctor {

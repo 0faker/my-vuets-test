@@ -1,4 +1,4 @@
-var vConsolePlugin = require('vconsole-webpack-plugin');
+// var vConsolePlugin = require('vconsole-webpack-plugin');
 var proxy = require('http-proxy-middleware')
 
 
@@ -7,7 +7,7 @@ var proxy = require('http-proxy-middleware')
 //   .describe('debug', 'debug 环境') // use 'webpack --debug'
 //   .argv;
 module.exports = {
-  baseUrl: '/wx',
+  publicPath: '/ppay',
 
   // pwa: {
   //   name: '创越医疗'
@@ -17,8 +17,8 @@ module.exports = {
 
   assetsDir: 'public',
   filenameHashing: true,
-  runtimeCompiler: undefined,
-  productionSourceMap: undefined,
+  runtimeCompiler: true,
+  productionSourceMap: false,
   parallel: undefined,
 
   chainWebpack: config => {
@@ -42,7 +42,7 @@ module.exports = {
   //       enable: true // 发布代码前记得改回 false
   //     }),
   //   ],
-  // }
+  // },
   css: {
     loaderOptions: {
       sass: {
@@ -59,12 +59,12 @@ module.exports = {
 
   devServer: {
     proxy: {
-      '/wx/server': {
+      '/ppay/testserver': {
         target: 'http://101.132.108.35:8081', // 需要请求的地址
         ws: true,
         changeOrigin: true, // 是否跨域
         pathRewrite: {
-          '^/wx/server': ''
+          '^/ppay/testserver': ''
         }
       }
 
@@ -76,5 +76,6 @@ module.exports = {
       postCompile: true,
       theme: true
     }
+
   }
 }

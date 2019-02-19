@@ -125,32 +125,31 @@
 </template>
 <script lang='ts'>
   import { Component, Prop, Vue } from "vue-property-decorator";
-  import male from "../svg/ic_male.svg";
-  import female from "../svg/ic_female.svg";
-  import Age from "../svg/green_year.svg";
-  import Height from "../svg/green_height.svg";
-  import Weight from "../svg/green_weight.svg";
-
+  // import male from "../svg/ic_male.svg";
+  // import female from "../svg/ic_female.svg";
+  // import Age from "../svg/green_year.svg";
+  // import Height from "../svg/green_height.svg";
+  // import Weight from "../svg/green_weight.svg";
   import Common from "../common/common";
   import ls from "local-storage";
   @Component({
     components: {
-      male,
-      female,
-      Age,
-      Height,
-      Weight
+      // male,
+      // female,
+      // Age,
+      // Height,
+      // Weight
     }
   })
   export default class kinsfolkInfo extends Vue {
-    patientId: number = 0;
-    famliyInfo!: Patient.PatientInfo;
-    BMI: number = 0;
-    imgSrc: number = 0; // 根据BMI选择不同颜色的人体图形
+    public patientId: number = 0;
+    public famliyInfo!: Patient.PatientInfo;
+    public BMI: number = 0;
+    public imgSrc: number = 0; // 根据BMI选择不同颜色的人体图形
     constructor() {
       super();
     }
-    created() {
+    public created() {
       this.famliyInfo = ls.get("selectedFamily");
       this.patientId = this.famliyInfo.id;
       this.getBMI();
@@ -158,14 +157,14 @@
     /**
      * 回到上页
      */
-    back() {
+    public back() {
       this.$store.state.isBack = true;
       this.$router.back();
     }
     /**
      * 计算BMI
      */
-    getBMI() {
+    public getBMI() {
       this.BMI = Common.computedBMI(
         +this.famliyInfo.height,
         +this.famliyInfo.weight
@@ -175,22 +174,22 @@
     /**
      * 年龄
      */
-    getAge(birthday: number) {
+    public getAge(birthday: number) {
       return birthday ? Common.computeAge(birthday) + "岁" : "未填写";
     }
     /**
      * 身高
      */
-    getHeight(height: string) {
+    public getHeight(height: string) {
       return height ? height + "cm" : "未填写";
     }
     /**
      * 体重
      */
-    getWeight(weight: string) {
+    public getWeight(weight: string) {
       return weight ? weight + "kg" : "未填写";
     }
-    getBMIImgSrc() {
+    public getBMIImgSrc() {
       if (+this.BMI > 0 && +this.BMI < 19) {
         this.imgSrc = 1;
       } else if (+this.BMI >= 19 && +this.BMI < 24) {
@@ -206,7 +205,7 @@
       }
     }
 
-    route(index: number) {
+    public route(index: number) {
       switch (index) {
         case 1:
           // 处方

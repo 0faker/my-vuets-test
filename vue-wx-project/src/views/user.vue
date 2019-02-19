@@ -16,7 +16,7 @@
       @click="goMyInfo"
     >
       <img
-        src="../assets/logo.png"
+        :src="headImgUrl"
         alt=""
       >
       <div class="tel">
@@ -92,148 +92,164 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import Common from '../common/common';
-import AddFamliy from '@/components/addFamily.vue';
-import axios from 'axios';
-import ls from 'local-storage';
-@Component({
-  components: {
-    AddFamliy,
-  },
-})
-export default class UserComponent extends Vue {
-    userPhone: string = '';
-    families: Patient.PatientInfo[] = [];
-    imgUrl: string = '';
-    userid: string = '';
-  // ----滑动相关----
-    timer: any; // 判断长按事件的定时器
-    isLongtouch?: boolean; // 判断是长按事件;true:是 false:不是
-    startX: number = 0; // 开始触摸的位置x
-    startY: number = 0; // 开始触摸的位置y
-    moveX: number = 0; // 滑动时的位置x
-    moveY: number = 0; // 滑动时的位置y
-    disX: number = 0; // 移动距离,
-  // ------亲属列表配置项----
-    options?: any;
-  // ---ui--
-    isShowCancel?: number = 10000;
-    CancelWords: boolean = true;
-    loadding: boolean = true;
-    noFamily: boolean = false;
-  /**
-   * 钩子
-   */
-    created() {}
-  /**
-   * dom加载完成钩子
-   */
-    mounted() {
-    this.Initialize();
-  }
-  /**
-   *  初始化
-   */
-    Initialize() {
-    // 页面加载蒙层
-    const myPopup: any = this.$refs.myPopup;
-    myPopup.show();
-    this.userid = this.$route.params.id;
-    axios
-      .all([
-        this.$server.getPatient(this.userid),
-        this.$server.getUser(this.userid),
-      ])
-      .then(
-        axios.spread((Patient: Patient.PatientList, User: any) => {
-          myPopup.hide();
-          // 两个请求现在都执行完成
-          this.families = Patient.result;
-          this.noFamily = this.families.length === 0 ? true : false;
-          this.userPhone = User.phone;
-          this.loadding = false;
-        }),
-      );
-  }
-  /**
-   * 点击查看患者详情
-   */
-    goFamilyInfo(id: number) {
-    const selectedFamily = this.families.find((x) => x.id === id);
-    console.log(selectedFamily);
-    ls.set('selectedFamily', selectedFamily);
-    this.$router.push({ path: `/kinsfolkinfo/${id}` });
-  }
-  /**
-   * 用户信息详情
-   */
-    goMyInfo() {
-    this.$router.push({ path: `/userinfo/${this.userid}` });
-  }
-  /**
-   * 转换手机号码格式
-   */
-    changePhone(input: number) {
-    return Common.change(input.toString());
-  }
-    onTouchStart(item: any, event: TouchEvent): void {
-    // 将长按状态初始化 false
-    this.isLongtouch = false;
+  import { Component, Vue } from "vue-property-decorator";
+  import Common from "../common/common";
+  import AddFamliy from "@/components/addFamily.vue";
+  import axios from "axios";
+  import ls from "local-storage";
+  @Component({
+    components: {
+      AddFamliy
+    }
+  })
+  export default class UserComponent extends Vue {
+    public userPhone: string = "";
+    public families: Patient.PatientInfo[] = [];
+    public headImgUrl: string = "";
+    public userid: string = "";
+    // ----滑动相关----
+    public timer: any; // 判断长按事件的定时器
+    public isLongtouch?: boolean; // 判断是长按事件;true:是 false:不是
+    public startX: number = 0; // 开始触摸的位置x
+    public startY: number = 0; // 开始触摸的位置y
+    public moveX: number = 0; // 滑动时的位置x
+    public moveY: number = 0; // 滑动时的位置y
+    public disX: number = 0; // 移动距离,
+    // ------亲属列表配置项----
+    public options?: any;
+    // ---ui--
+    public isShowCancel?: number = 10000;
+    public CancelWords: boolean = true;
+    public loadding: boolean = true;
+    public noFamily: boolean = false;
 
-    this.timer = setTimeout(() => {
-      // 定时 1.5s内未清定时器即为长按事件
-      this.isLongtouch = true;
-      if (this.isLongtouch) {
-        // console.log(this.$refs.list)
-        // this.isalldel = false;
-        // this.$refs.list.scrollTop = scrollTop;
-      }
-    }, 1500);
-    const familyLists = this.$refs.familyLists;
-    this.startX = event.targetTouches[0].clientX;
-    this.startY = event.targetTouches[0].clientY;
-    this.moveY = event.targetTouches[0].clientY;
-    this.moveX = event.targetTouches[0].clientX;
-  }
-    onTouchMove(item: any, event: TouchEvent): void {
-    clearTimeout(this.timer);
-    this.isLongtouch = false;
-    this.moveX = event.targetTouches[0].clientX;
-    this.moveY = event.targetTouches[0].clientY;
-  }
-    onTouchEnd(item: any, index: number, event: Event): void {
-    clearTimeout(this.timer);
-    if (!this.isLongtouch) {
-      if (
-        this.moveX - this.startX > 20 &&
-        Math.abs(this.moveY - this.startY) < 30
-      ) {
-        this.isShowCancel = 100000;
-      } else if (
-        this.moveX - this.startX < -20 &&
-        Math.abs(this.moveY - this.startY) < 30
-      ) {
-        this.CancelWords = true;
-        this.isShowCancel = index;
+    /**
+     * 钩子
+     */
+    public created() {}
+    /**
+     * dom加载完成钩子
+     */
+    public mounted() {
+      this.Initialize();
+    }
+    /**
+     *  初始化
+     */
+    public Initialize() {
+      // 页面加载蒙层
+      const myPopup: any = this.$refs.myPopup;
+      myPopup.show();
+      this.userid = this.$route.params.id;
+      axios
+        .all([
+          this.$server.getPatient(this.userid),
+          this.$server.getUser(this.userid)
+        ])
+        .then(
+          axios.spread((Patient: Patient.PatientList, User: any) => {
+            myPopup.hide();
+            // 两个请求现在都执行完成
+            this.families = Patient.result;
+            this.noFamily = this.families.length === 0 ? true : false;
+            this.headImgUrl = ls.get("headImg");
+            this.userPhone = User.phone;
+            this.loadding = false;
+          })
+        );
+    }
+    /**
+     * 点击查看患者详情
+     */
+    public goFamilyInfo(id: number) {
+      const selectedFamily = this.families.find(x => x.id === id);
+      console.log(selectedFamily);
+      ls.set("selectedFamily", selectedFamily);
+      this.$router.push({ path: `/kinsfolkinfo/${id}` });
+    }
+    /**
+     * 用户信息详情
+     */
+    public goMyInfo() {
+      this.$router.push({ path: `/userinfo/${this.userid}` });
+    }
+    /**
+     * 转换手机号码格式
+     */
+    public changePhone(input: number) {
+      return Common.change(input.toString());
+    }
+    public onTouchStart(item: any, event: TouchEvent): void {
+      // 将长按状态初始化 false
+      this.isLongtouch = false;
+
+      this.timer = setTimeout(() => {
+        // 定时 1.5s内未清定时器即为长按事件
+        this.isLongtouch = true;
+        if (this.isLongtouch) {
+          // console.log(this.$refs.list)
+          // this.isalldel = false;
+          // this.$refs.list.scrollTop = scrollTop;
+        }
+      }, 1500);
+      const familyLists = this.$refs.familyLists;
+      this.startX = event.targetTouches[0].clientX;
+      this.startY = event.targetTouches[0].clientY;
+      this.moveY = event.targetTouches[0].clientY;
+      this.moveX = event.targetTouches[0].clientX;
+    }
+    public onTouchMove(item: any, event: TouchEvent): void {
+      clearTimeout(this.timer);
+      this.isLongtouch = false;
+      this.moveX = event.targetTouches[0].clientX;
+      this.moveY = event.targetTouches[0].clientY;
+    }
+    public onTouchEnd(item: any, index: number, event: Event): void {
+      clearTimeout(this.timer);
+      if (!this.isLongtouch) {
+        if (
+          this.moveX - this.startX > 20 &&
+          Math.abs(this.moveY - this.startY) < 30
+        ) {
+          this.isShowCancel = 100000;
+        } else if (
+          this.moveX - this.startX < -20 &&
+          Math.abs(this.moveY - this.startY) < 30
+        ) {
+          this.CancelWords = true;
+          this.isShowCancel = index;
+        }
       }
     }
+    /**
+     * 解绑亲属
+     */
+    public changeWord(item: any) {
+      if (!this.CancelWords) {
+        this.$server.delPaitient(+this.userid, item.id).then(res => {
+          if (res.code == "C200") {
+            let index = this.families.findIndex(e => e.id === item.id);
+            this.families.splice(index, 1);
+            console.log(this.families);
+            this.noFamily = this.families.length === 0 ? true : false;
+          }
+        });
+      } else {
+        // 切换文字
+        this.CancelWords = false;
+      }
+
+      console.log(item);
+    }
+    /**
+     * 扫码关注亲属后回调
+     */
+    public getQrCode() {
+      this.$server.getPatient(this.userid).then((res: any) => {
+        this.families = res.result;
+      });
+    }
   }
-  /**
-   * 切换取消关注文字
-   */
-    changeWord(item: any) {
-    this.CancelWords = false;
-    console.log(item);
-  }
-  /**
-   * 扫码关注亲属后回调
-   */
-    getQrCode() {
-    console.log('qrcode');
-    // this.getUser();
-  }
-}
 </script>
 <style lang='scss' scoped>
   * {
@@ -264,18 +280,25 @@ export default class UserComponent extends Vue {
       background-color: #fff;
       text-align: left;
       overflow: hidden;
+      vertical-align: middle;
+      position: relative;
       > img {
+        position: absolute;
+        top: 50%;
+        left: 1.5rem;
+        transform: translateY(-50%);
         width: 3rem;
         height: 3rem;
         // vertical-align: middle;
         border-radius: 50%;
-        margin: 0.725rem 1rem 0.725rem 1.5rem;
       }
-      > div {
+      > .tel {
         display: inline-block;
         height: 100%;
+        line-height: 4.5rem;
         overflow: hidden;
         font-size: 1.5rem;
+        margin-left: 5.5rem;
       }
     }
     > .families {

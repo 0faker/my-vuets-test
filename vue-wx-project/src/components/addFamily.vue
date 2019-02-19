@@ -98,7 +98,7 @@
     </div>
     <div
       class="phone"
-      @click="addByPhoen"
+      @click="addByPhone"
     >
       <svg
         width="3rem"
@@ -161,33 +161,60 @@
 </template>
 <script lang='ts'>
   import { Component, Prop, Vue } from "vue-property-decorator";
-  const wx = require("weixin-js-sdk");
-  import wxConfig from "../common/wxConfig";
+  // const wx = require('weixin-js-sdk');
+  import wxApi from "../common/wxConfig";
   import { SignatureObj, WeChatSignature } from "../entity/SignatureObj";
   import Common from "../common/common";
+  declare var wx: any;
   @Component
   export default class AddFamliy extends Vue {
-    url: string = location.href;
-    SignatureObj?: SignatureObj; // 微信签名
+    public url: string = location.href;
+    public SignatureObj?: SignatureObj; // 微信签名
     @Prop() private userId!: string;
     // 添加亲属模块
     /**
      * 扫一扫添加亲属
      */
-    getScan(): void {
+    public getScan(): void {
+      console.log(Common.getPhoneType());
       if (Common.getPhoneType() !== "ios") {
         this.$server.getWxConfig(this.url).then((res: WeChatSignature) => {
-          console.log(res);
           this.SignatureObj = {
-            debug: false
-            // appId
+            debug: false,
+            nonceStr: res.nonceStr,
+            signature: res.signature,
+            timeStamp: res.timeStamp,
+            jsApiList: []
           };
+          wxApi.wxConfig(this.SignatureObj);
+          this.scanQRCode();
         });
+      } else {
+        this.scanQRCode();
       }
-      wxConfig;
-      this.$emit("qrcode");
+      // wxConfig;
     }
-    addByPhoen() {
+    /**
+     * 扫码
+     */
+    scanQRCode() {
+      wx.scanQRCode({
+        needResult: 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
+        scanType: ["qrcode"], // 可以指定扫二维码还是一维码，默认二者都有
+        success: (res: any) => {
+          this.$server
+            .addPaitienQRcode(+this.userId, res.resultStr)
+            .then((res: any) => {
+              this.$emit("qrcode");
+            })
+            .catch(error => {});
+        },
+        fail: (res: any) => {
+          // alert(res)
+        }
+      });
+    }
+    public addByPhone() {
       this.$router.push({ path: "/addfamilybyphone/" + this.userId });
     }
   }

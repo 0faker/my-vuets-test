@@ -63,30 +63,30 @@
 
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import moment from "moment";
-  import ls from "local-storage";
-  import common from "../common/common";
-  @Component
-  export default class PreventPlan extends Vue {
-    preventiveScheme: any;
-    loadding: boolean = false;
-    mounted() {
-      this.preventiveScheme = ls.get("assessmentpreventplan");
-      console.log(this.preventiveScheme);
-      this.loadding = true;
-    }
-    back() {
-      this.$store.state.isBack = true;
-      this.$router.back();
-    }
-    /**
-     * 运动形式
-     */
-    getExerciseType(input: string) {
-      return common.getExerciseType(input);
-    }
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import moment from 'moment';
+import ls from 'local-storage';
+import common from '../common/common';
+@Component
+export default class PreventPlan extends Vue {
+  public preventiveScheme: any;
+  public loadding: boolean = false;
+  public mounted() {
+    this.preventiveScheme = ls.get('assessmentpreventplan');
+    console.log(this.preventiveScheme);
+    this.loadding = true;
   }
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
+  }
+  /**
+   * 运动形式
+   */
+  public getExerciseType(input: string) {
+    return common.getExerciseType(input);
+  }
+}
 </script>
 <style lang='scss' scoped>
   main {

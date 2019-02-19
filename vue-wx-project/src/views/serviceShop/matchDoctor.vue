@@ -23,39 +23,57 @@
         </div>
       </div>
     </div>
+
     <main>
-      <div class="no_doctor">暂未找到相关医生信息！</div>
+      <service-list :doctor-service="doctorServiceLists"></service-list>
     </main>
-    <main>
-      <service-list></service-list>
-    </main>
+
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import ServiceList from "../../components/serviceList.vue";
-  @Component({
-    components: {
-      ServiceList
-    }
-  })
-  export default class MatchDoctor extends Vue {
-    doctorName: string | string[] = "";
-    created() {
-      this.doctorName = this.$route.query.doctor;
-    }
-    /**
-     * 回到上页
-     */
-    back() {
-      this.$store.state.isBack = true;
-      this.$router.back();
-    }
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import ServiceList from '../../components/serviceList.vue';
+@Component({
+  components: {
+    ServiceList,
+  },
+})
+export default class MatchDoctor extends Vue {
+  public doctorName: string = '';
+  public doctorServiceLists: any = [];
+  public created() {
+    this.doctorName = this.$route.query.doctor.toString();
+    this.getDoctorService();
   }
+  /**
+   * 回到上页
+   */
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
+  }
+  /**
+   * 获取医生服务
+   */
+  public getDoctorService() {
+    this.$server
+      .GetCityDoctors(10000, 1, undefined, this.doctorName)
+      .then((data) => {
+        this.doctorServiceLists = data.result;
+      });
+  }
+}
 </script>
 <style lang='scss' scoped>
   .match_doctor {
+    height: 100%;
+    position: relative;
     > .top {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
       padding: 1rem;
       height: 4.25rem;
       display: flex;
@@ -89,12 +107,11 @@
       }
     }
     > main {
-      > .no_doctor {
-        font-size: 1.33rem;
-        margin-top: 3.67rem;
-        text-align: center;
-        font-family: PingFangSC;
-      }
+      height: 100%;
+      overflow: scroll;
+      padding-top: 4.25rem;
+      z-index: 0;
+      box-sizing: border-box;
     }
   }
 </style>

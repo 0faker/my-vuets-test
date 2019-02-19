@@ -110,110 +110,110 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import ls from "local-storage";
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import ls from 'local-storage';
 
-  import METsChart from "@/components/METsChart.vue";
-  @Component({
-    components: {
-      METsChart
-    }
-  })
-  export default class AccomplishInfo extends Vue {
-    id: string = ""; //康复记录id
-    patientid: string = ""; //患者id
-    accomplishedInfo!: Accomplished.AccomplishedInfo;
-    // description: string = ""; //不同borg表文字描述不同
-    effectiveExerciseRate: number = 0; //有效时长占比
-    isQualified: boolean = false; //是否达标
-    borg: any;
-    //----加载---
-    loadding: boolean = false;
-    created() {
-      this.getBorg();
-    }
-    mounted() {
-      this.initialize();
-      this.getAccomplishedInfo();
-    }
-    back() {
-      this.$store.state.isBack = true;
-      this.$router.back();
-    }
-    // 初始化
-    initialize() {
-      this.id = this.$route.params.id;
-      this.patientid = this.$route.params.patientid;
-    }
-    /**
-     * 获取记录详情
-     */
-    getAccomplishedInfo(): void {
-      this.$server.getAccomplishedInfo(this.patientid, this.id).then(res => {
-        this.accomplishedInfo = res.result;
-        this.effectiveExerciseRate =
-          // 向下取整保留一位小数
-          Math.floor(
-            (this.accomplishedInfo.effectiveExerciseTime /
-              (this.accomplishedInfo.dailyPrescription.exerciseTime * 60)) *
-              1000
-          ) / 10;
+import METsChart from '@/components/METsChart.vue';
+@Component({
+  components: {
+    METsChart,
+  },
+})
+export default class AccomplishInfo extends Vue {
+  public id: string = ''; // 康复记录id
+  public patientid: string = ''; // 患者id
+  public accomplishedInfo!: Accomplished.AccomplishedInfo;
+  // description: string = ""; //不同borg表文字描述不同
+  public effectiveExerciseRate: number = 0; // 有效时长占比
+  public isQualified: boolean = false; // 是否达标
+  public borg: any;
+  // ----加载---
+  public loadding: boolean = false;
+  public created() {
+    this.getBorg();
+  }
+  public mounted() {
+    this.initialize();
+    this.getAccomplishedInfo();
+  }
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
+  }
+  // 初始化
+  public initialize() {
+    this.id = this.$route.params.id;
+    this.patientid = this.$route.params.patientid;
+  }
+  /**
+   * 获取记录详情
+   */
+  public getAccomplishedInfo(): void {
+    this.$server.getAccomplishedInfo(this.patientid, this.id).then((res) => {
+      this.accomplishedInfo = res.result;
+      this.effectiveExerciseRate =
+        // 向下取整保留一位小数
+        Math.floor(
+          (this.accomplishedInfo.effectiveExerciseTime /
+            (this.accomplishedInfo.dailyPrescription.exerciseTime * 60)) *
+            1000,
+        ) / 10;
 
-        this.isQualified = this.effectiveExerciseRate >= 100 ? true : false;
-        this.loadding = true;
-        this.loadding = true;
+      this.isQualified = this.effectiveExerciseRate >= 100 ? true : false;
+      this.loadding = true;
+      this.loadding = true;
+    });
+  }
+  /**
+   * 获取borg表id
+   */
+  public getBorgId(input: number) {
+    return input === 1 ? '自测疲劳感为' : '自我理解的用力程度为';
+  }
+  /**
+   * 获取borg表内容
+   */
+  public getBorg() {
+    const borg = ls.get('borg');
+    // localstorage中有borg表
+    if (borg) {
+      this.borg = borg;
+    } else {
+      this.$server.getBorg().then((res) => {
+        this.borg = res.result;
+        ls.set('borg', this.borg);
       });
     }
-    /**
-     * 获取borg表id
-     */
-    getBorgId(input: number) {
-      return input === 1 ? "自测疲劳感为" : "自我理解的用力程度为";
-    }
-    /**
-     * 获取borg表内容
-     */
-    getBorg() {
-      let borg = ls.get("borg");
-      //localstorage中有borg表
-      if (borg) {
-        this.borg = borg;
-      } else {
-        this.$server.getBorg().then(res => {
-          this.borg = res.result;
-          ls.set("borg", this.borg);
-        });
-      }
-    }
-    /**
-     * borg值=>文字
-     */
-    borgRepresent(input: number) {
-      let result: string = "";
-      //本次所用的borg表
-      let currentBorg = JSON.parse(
-        this.borg.find((x: any) => x.id === this.accomplishedInfo.borgCategory.id)
-          .borgContent
-      );
-      result = currentBorg.find((x: any) => x.value === input).description;
-      return result;
-    }
-    /**
-     * 页面跳转
-     */
-    goRoute(input: string) {
-      switch (input) {
-        case "ecg":
-          break;
-        // 处方
-        case "pre":
-          this.$router.push(
-            "/accomplishedprescription/" + this.accomplishedInfo.id
-          );
-          break;
-      }
+  }
+  /**
+   * borg值=>文字
+   */
+  public borgRepresent(input: number) {
+    let result: string = '';
+    // 本次所用的borg表
+    const currentBorg = JSON.parse(
+      this.borg.find((x: any) => x.id === this.accomplishedInfo.borgCategory.id)
+        .borgContent,
+    );
+    result = currentBorg.find((x: any) => x.value === input).description;
+    return result;
+  }
+  /**
+   * 页面跳转
+   */
+  public goRoute(input: string) {
+    switch (input) {
+      case 'ecg':
+        break;
+      // 处方
+      case 'pre':
+        this.$router.push(
+          '/accomplishedprescription/' + this.accomplishedInfo.id,
+        );
+        break;
     }
   }
+}
 </script>
 <style lang='scss' scoped>
   .accomplish_info {

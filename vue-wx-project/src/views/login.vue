@@ -1,55 +1,60 @@
 <template>
   <div
-    class="login"
-    v-if="loadding"
+    class='login'
+    v-if='loadding'
   >
     <header>
       登录
     </header>
     <div
-      v-if="warn"
-      class="warn"
+      v-if='warn'
+      class='warn'
     >验证码已发送，有效期为五分钟，请尽快输入。</div>
-    <div class="tel">
+    <div class='tel'>
       <input
-        type="tel"
-        placeholder="请输入您的手机号"
-        v-model="showTel"
+        type='tel'
+        placeholder='请输入您的手机号'
+        v-model='showTel'
         maxlength=13
-        @input="verifyPhone"
+        @input='verifyPhone'
       >
-      <div class="clear">
+      <div class='clear'>
         <img
-          src=""
-          alt=""
+          src=''
+          alt=''
         >
       </div>
     </div>
-    <div class="code">
+    <div class='code'>
       <input
-        type="text"
-        pattern="[0-9]*"
+        type='text'
+        pattern='[0-9]*'
         maxlength=4
-        placeholder="输入验证码"
-        @input="verifyCode"
+        placeholder='输入验证码'
+        @input='verifyCode'
+        v-model='code'
       >
-      <button
-        class="get-code"
-        :style="{backgroundColor:activeCodeColor}"
-        :disabled="isCanGetCode"
-      >{{getCodeMsg}}</button>
+      <input
+        type="button"
+        class='get-code'
+        :style='{backgroundColor:activeCodeColor}'
+        :disabled='isCanGetCode'
+        @click='sendSMSCode'
+        v-model="codeMsg"
+      >
       <div
-        class="wrongCodeMsg"
-        v-if="showWrongCodeMsg"
+        class='wrongCodeMsg'
+        v-if='showWrongCodeMsg'
       >
         {{wrongCodeMsg}}
       </div>
     </div>
 
     <button
-      class="load"
-      :disabled="isCanLogin"
-      :style="{backgroundColor:activeLoginColor}"
+      class='load'
+      :disabled='isCanLogin'
+      :style='{backgroundColor:activeLoginColor}'
+      @click="login"
     >
       登录
     </button>
@@ -57,109 +62,166 @@
 </template>
 
 <script lang='ts'>
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import Common from '../common/common';
-import * as ls from 'local-storage';
-import Axios from 'axios';
-@Component
-export default class LoginComponent extends Vue {
-    wxCode?: string; // 微信code
-    tel?: number; // 号码
-    showTel: string = ''; // 输入框中显示的号码
-    clearable: boolean = true; // 清空按钮
-    warn: boolean = false; // 提示语
-    code: string = ''; // 验证码
-    wrongCodeMsg?: string = ''; // 验证码错误提示
-    showWrongCodeMsg?: boolean; // 验证码错误提示显示
-  // ----ui-----
-    isCanGetCode?: boolean; // 获取验证码可点击
-    getCodeMsg?: string; // 验证码内文字
-    activeCodeColor?: string; // 获取验证码按钮颜色
-    isCanLogin?: boolean; // 登录按钮可用状态
-    activeLoginColor?: string; // 登录按钮颜色
-    loadding?: boolean = false;
-    mounted() {
-    this.wrongCodeMsg = '验证码有误，请重新输入！';
-    this.showWrongCodeMsg = true;
-    this.isCanGetCode = true;
-    this.activeCodeColor = '#6d726d';
-    this.getCodeMsg = '获取验证码';
-    this.isCanLogin = true;
-    this.activeLoginColor = '#6d726d';
-    // this.warn = true;
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import Common from "../common/common";
+  import * as ls from "local-storage";
+  import Axios from "axios";
+  @Component
+  export default class LoginComponent extends Vue {
+    private wxCode?: string; // 微信code
+    private tel: string = ""; // 号码
+    private showTel: string = ""; // 输入框中显示的号码
+    private clearable: boolean = true; // 清空按钮
+    private warn: boolean = false; // 提示语
+    private code: string = ""; // 验证码
+    private isSendedCode: boolean = false; // 是否已发送验证码
+    private wrongCodeMsg?: string = ""; // 验证码错误提示
+    private showWrongCodeMsg?: boolean; // 验证码错误提示显示
+    // ----ui-----
+    private isCanGetCode: boolean = true; // 获取验证码可点击
+    private codeMsg: string = "获取验证码"; // 验证码内文字
+    private activeCodeColor?: string; // 获取验证码按钮颜色
+    private isCanLogin: boolean = true; // 登录按钮可用状态
+    private activeLoginColor?: string; // 登录按钮颜色
+    private loadding: boolean = false;
 
-    this.code = this.$route.query.code.toString();
-    console.log(this.code);
-    this.getAuth();
-  }
-    getAuth() {
-    console.log(this.$server);
-    this.loadding = true;
-    this.$server
-      .getAuth({
-        //  登陆类型
-        logonEquipmentType: 2,
-        // 用户登陆ip
-        logonIp: '127.0.0.1',
-        // 登陆设备编号
-        equipmentId: 'fromh5',
-        logonMac: 'o.o.o.o',
-        origin: 2,
-        code: this.code,
-      })
-      .then((res) => {
-        console.log(res);
-      });
-  }
-  /**
-   * 验证手机号
-   */
-    verifyPhone() {
-    const input: string = this.showTel;
-    // this.$server
-    console.log(input);
-    this.showTel = Common.change(input);
-    this.tel = +this.showTel.replace(/\s+/g, '');
-    // 正则匹配
-    if (Common.regPhone(this.tel)) {
-      // 匹配
-      this.isCanGetCode = false;
-      this.activeCodeColor = '#4caf50';
-    } else {
-      this.isCanGetCode = true;
-      this.activeCodeColor = '#6d726d';
+    unionId!: number;
+    openId!: number;
+    created() {
+      this.wrongCodeMsg = "验证码有误，请重新输入！";
+      this.showWrongCodeMsg = false;
+      this.activeCodeColor = "#6d726d";
+      // this.codeMsg = "获取验证码";
+      this.isCanLogin = true;
+      this.activeLoginColor = "#6d726d";
+      // this.warn = true;
+
+      this.wxCode = this.$route.query.code.toString();
+      console.log(this.wxCode);
+      this.getAuth();
+    }
+    /**
+     * 登录第一步
+     */
+    private getAuth() {
+      this.$server
+        .getAuth({
+          //  登陆类型
+          logonEquipmentType: 2,
+          // 用户登陆ip
+          logonIp: "127.0.0.1",
+          // 登陆设备编号
+          equipmentId: "fromh5",
+          logonMac: "o.o.o.o",
+          origin: 2,
+          code: this.wxCode
+        })
+        .then(res => {
+          // 判断是否已登录(返回有token)
+          if (res.Authorization) {
+            if (res.wx) {
+              ls.set("headImg", res.wx.headImgUrl);
+            }
+            // 保存token
+            ls.set("Authorization", res.Authorization);
+            Axios.defaults.headers = {
+              Authorization: res.Authorization
+            };
+            this.$router.replace({ path: `user/${res.patient.id}` });
+          } else {
+            // 显示登录页面
+
+            this.loadding = true;
+            // 返回unionid
+            this.unionId = res.unionid;
+            this.openId = res.openid;
+          }
+        });
+    }
+    /**
+     * 验证手机号
+     */
+    private verifyPhone() {
+      const input: string = this.showTel;
+      this.showTel = Common.change(input);
+      this.tel = this.showTel.replace(/\s+/g, "");
+      // 正则匹配
+      if (Common.regPhone(+this.tel)) {
+        // 匹配
+        if (!this.isSendedCode) {
+          this.isCanGetCode = false; // 不可点击
+          this.activeCodeColor = "#4caf50";
+          this.activeLoginColor = this.code.length == 4 ? "#4caf50" : "#6d726d";
+        }
+      } else {
+        this.isCanGetCode = true;
+        this.activeCodeColor = "#6d726d";
+        this.activeLoginColor = "#6d726d";
+      }
+      this.verifyCode();
+    }
+    /**
+     * 发送验证码
+     */
+    private sendSMSCode() {
+      this.$server
+        .loginTest(this.tel)
+        .then(res => {
+          this.isSendedCode = true;
+          this.isCanGetCode = true;
+          this.activeCodeColor = "#6d726d";
+          this.warn = true;
+          // 设置倒计时
+          let countdownNumber = 60; // 设置60s
+          this.codeMsg = countdownNumber + "s";
+          let countdown = setInterval(() => {
+            countdownNumber--;
+            console.log(this.codeMsg);
+            this.codeMsg = countdownNumber + "s";
+            if (countdownNumber < 0) {
+              clearInterval(countdown);
+              this.codeMsg = "重新获取";
+              this.isSendedCode = false;
+              this.activeCodeColor = "#4caf50";
+              this.isCanGetCode = false;
+            }
+          }, 1000);
+        })
+        .catch(error => {});
+    }
+    /**
+     * 验证码
+     */
+    private verifyCode() {
+      if (Common.regPhone(+this.tel)) {
+        this.isCanLogin = this.code.length == 4 ? false : true;
+        this.activeLoginColor = this.code.length == 4 ? "#4caf50" : "#6d726d";
+      }
+    }
+    /**
+     * 登录
+     */
+    private login() {
+      this.$server
+        .login({
+          //  登陆类型
+          logonEquipmentType: 2,
+          // 用户登陆ip
+          logonIp: "127.0.0.1",
+          // 登陆设备编号
+          equipmentId: "fromh5",
+          logonMac: "o.o.o.o",
+          origin: 2,
+          phone: this.tel,
+          authCode: this.code,
+          unionId: this.unionId,
+          openId: this.openId
+        })
+        .then(res => {
+          console.log(res);
+        });
     }
   }
-  /**
-   * 验证码
-   */
-    verifyCode() {
-    // this.code.length==4?
-  }
-  /**
-   * 登录
-   */
-    login() {
-    // this.$server
-    //   .login_async({
-    //     //  登陆类型
-    //     logonEquipmentType: 2,
-    //     // 用户登陆ip
-    //     logonIp: "127.0.0.1",
-    //     // 登陆设备编号
-    //     equipmentId: "fromh5",
-    //     logonMac: "o.o.o.o",
-    //     origin: 2,
-    //     phone: this.tel,
-    //     authCode: this.code,
-    //     unionId: 1,
-    //     openId: 1
-    //   })
-    //   .then(res => {
-    //     console.log(res);
-    //   });
-  }
-}
 </script>
 <style lang='scss' scoped>
   .login {
@@ -201,7 +263,7 @@ export default class LoginComponent extends Vue {
       > .get-code {
         font-size: 1.5rem;
         color: #fff;
-        padding: 1.04rem 0;
+        padding: 1.04rem 0rem !important;
         outline: 0;
         border: 0;
         width: 10rem;

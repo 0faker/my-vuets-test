@@ -6,10 +6,7 @@ export default new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
-    {
-      path: '/',
-      redirect: '/login',
-    },
+
     {
       path: '/user/:id',
       name: 'user',
@@ -23,7 +20,7 @@ export default new Router({
       },
     },
     {
-      path: '/login',
+      path: '/',
       name: 'login',
       component: () => import(/* webpackChunkName: "about" */ './views/login.vue'),
       meta: {
@@ -129,7 +126,7 @@ export default new Router({
     {
       path: '/accomplishedprescription/:id',
       name: 'AccomplishedPrescription',
-      component: () => import(/* webpackChunkName: "about" */'./views/accomplishedPrescription.vue')
+      component: () => import(/* webpackChunkName: "about" */'./views/accomplishedPrescription.vue'),
     },
     {
       path: '/preventlist/:id',
@@ -251,5 +248,30 @@ export default new Router({
         title: '搜索医生',
       },
     },
+    {
+      path: '/threeminutesrecords/:id',      // 监测记录id
+      name: 'threeMinutesRecords',
+      component: () => import(/* webpackChunkName: "about" */ './views/threeMinutesRecords.vue'),
+      meta: {
+        title: '3分钟心电记录列表',
+      },
+    },
+    {
+      path: '/threeminutesresult/:id',      // 监测记录id
+      name: 'threeMinutesResult',
+      component: () => import(/* webpackChunkName: "about" */ './views/threeMinutesResult.vue'),
+      meta: {
+        title: '3分钟心电记录结果',
+      },
+    },
+    {
+      path: '/invalidecg',      // 监测记录id
+      name: 'invalidEcg',
+      component: () => import(/* webpackChunkName: "about" */ './views/invalidEcg.vue'),
+      meta: {
+        title: '无效心电',
+      },
+    },
   ],
+
 });

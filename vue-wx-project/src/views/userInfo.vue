@@ -374,241 +374,241 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import moment from "moment";
-  import Common from "../common/common";
-  import { userInfos } from "../entity/user";
-  @Component
-  export default class UserInfo extends Vue {
-    userId: string; // 用户id
-    userInfos: userInfos;
-    datePicker: any; // 时间选择器
-    sexPicker: any; // 性别选择器
-    heightPicker: any; // 身高选择器
-    heightArray: object[] = []; // 身高对象数组
-    weightPicker: any = null; // 体重选择器
-    weightArray: object[] = []; // 体重对象数组
-    // ----ui----------
-    // isName:
-    loadding: boolean = false;
-    constructor() {
-      super();
-      this.userId = "";
-      this.userInfos = new userInfos();
-    }
-    /**
-     * 获取用户详细信息
-     */
-    created() {
-      this.userId = this.$route.params.id;
-      this.getUser();
-    }
-    mounted() {
-      for (let i = 0; i < 250; i++) {
-        this.heightArray.push({ text: i + "cm", value: i });
-        this.weightArray.push({ text: i + "kg", value: i });
-      }
-    }
-    back() {
-      this.$store.state.isBack = true;
-      this.$router.back();
-    }
-    /**
-     * 获取用户信息
-     */
-    getUser() {
-      this.$server.getUser(this.userId).then((res: userInfos) => {
-        console.log(res);
-        this.loadding = true;
-        this.userInfos = Object.assign({}, this.userInfos, res);
-      });
-    }
-    /**
-     * 转换性别
-     */
-    changeSex(input: string) {
-      return Common.getSex(input);
-    }
-    /**
-     * 生日格式
-     */
-    getBirthday(input: number) {
-      return moment(input).format("YYYY-MM-DD");
-    }
-    /**
-     * 计算BMI
-     */
-    computedBMI() {
-      if (this.userInfos.height && this.userInfos.weight) {
-        return Common.computedBMI(this.userInfos.height, this.userInfos.weight);
-      }
-    }
-    /**
-     * 修改用户姓名
-     */
-    modifyUserName() {
-      this.$router.push({
-        path: "/modifyusername/" + this.userId,
-        query: {
-          username: this.userInfos.name
-        }
-      });
-    }
-    /**
-     * 更换手机号
-     */
-    modifyUserPhone() {
-      this.$router.push({
-        path: "/modifyuserphone/" + this.userId,
-        query: {
-          userphone: this.userInfos.phone
-        }
-      });
-    }
-    /**
-     * 生日选择器
-     */
-    showDatePicker() {
-      if (!this.datePicker) {
-        this.datePicker = this.$createDatePicker({
-          title: "选择生日",
-          min: new Date(1920, 1, 1),
-          max: new Date(2020, 9, 20),
-          value: new Date(this.userInfos.birthday),
-          onSelect: (date: Date, selectedVal: any, selectedText: string) => {
-            // 确定
-            this.userInfos.birthday = date.getTime();
-            this.modify();
-          },
-          onCancel: () => {
-            // 取消
-          },
-          columnCount: 3,
-          zIndex: 1000,
-          format: {
-            year: "YYYY年",
-            month: "MM月",
-            date: "DD 日"
-          }
-        });
-      }
-      this.datePicker.show();
-    }
-    /**
-     * 性别选择器
-     */
-    showSexPicker() {
-      if (!this.sexPicker) {
-        this.sexPicker = this.$createPicker({
-          title: "选择性别",
-          selectedIndex: [this.userInfos.sex],
-          data: [
-            [
-              {
-                text: "男",
-                value: "0"
-              },
-              {
-                text: "女",
-                value: "1"
-              }
-            ]
-          ],
-          onSelect: (
-            selectedVal: any,
-            selectedIndex: number,
-            selectedText: string
-          ) => {
-            // 确定
-            this.userInfos.sex = selectedVal[0];
-            this.sexPicker = null;
-            this.modify();
-          },
-          onCancel: () => {
-            // 取消
-            this.sexPicker = null;
-          }
-        });
-        this.sexPicker.show();
-      }
-    }
-    /**
-     * 身高选择器
-     */
-    showHeightPicker() {
-      if (!this.heightPicker) {
-        this.heightPicker = this.$createPicker({
-          title: "选择身高",
-          selectedIndex: [this.userInfos.height],
-          data: [this.heightArray],
-          onSelect: (
-            selectedVal: any,
-            selectedIndex: number,
-            selectedText: string
-          ) => {
-            // 确定
-            this.userInfos.height = selectedVal[0];
-            this.heightPicker = null;
-            this.modify();
-          },
-          onCancel: () => {
-            // 取消
-            this.heightPicker = null;
-          }
-        });
-        this.heightPicker.show();
-      }
-    }
-    /**
-     * 体重选择器
-     */
-    showWeightPicker() {
-      if (!this.weightPicker) {
-        console.log(224);
-        this.weightPicker = this.$createPicker({
-          title: "选择体重",
-          selectedIndex: [this.userInfos.weight],
-          data: [this.weightArray],
-          onSelect: (
-            selectedVal: any,
-            selectedIndex: number,
-            selectedText: string
-          ) => {
-            // 确定
-            this.userInfos.weight = selectedVal[0];
-            this.weightPicker = null;
-            this.modify();
-          },
-          onCancel: () => {
-            // 取消
-            this.weightPicker = null;
-          }
-        });
-        this.weightPicker.show();
-      }
-    }
-    /**
-     * 确定修改
-     */
-    modify() {
-      this.$server
-        .modify(
-          this.userId,
-          this.userInfos.name,
-          this.userInfos.sex,
-          this.getBirthday(this.userInfos.birthday),
-          this.userInfos.height,
-          this.userInfos.weight
-        )
-        .then((res: BaseEntity.BaseEntityResult) => {});
-    }
-    /**
-     * 手机号格式
-     */
-    changePhone(input: string) {
-      return Common.change(input);
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import moment from 'moment';
+import Common from '../common/common';
+import { userInfos } from '../entity/user';
+@Component
+export default class UserInfo extends Vue {
+  public userId: string; // 用户id
+  public userInfos: userInfos;
+  public datePicker: any; // 时间选择器
+  public sexPicker: any; // 性别选择器
+  public heightPicker: any; // 身高选择器
+  public heightArray: object[] = []; // 身高对象数组
+  public weightPicker: any = null; // 体重选择器
+  public weightArray: object[] = []; // 体重对象数组
+  // ----ui----------
+  // isName:
+  public loadding: boolean = false;
+  constructor() {
+    super();
+    this.userId = '';
+    this.userInfos = new userInfos();
+  }
+  /**
+   * 获取用户详细信息
+   */
+  public created() {
+    this.userId = this.$route.params.id;
+    this.getUser();
+  }
+  public mounted() {
+    for (let i = 0; i < 250; i++) {
+      this.heightArray.push({ text: i + 'cm', value: i });
+      this.weightArray.push({ text: i + 'kg', value: i });
     }
   }
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
+  }
+  /**
+   * 获取用户信息
+   */
+  public getUser() {
+    this.$server.getUser(this.userId).then((res: userInfos) => {
+      console.log(res);
+      this.loadding = true;
+      this.userInfos = Object.assign({}, this.userInfos, res);
+    });
+  }
+  /**
+   * 转换性别
+   */
+  public changeSex(input: string) {
+    return Common.getSex(input);
+  }
+  /**
+   * 生日格式
+   */
+  public getBirthday(input: number) {
+    return moment(input).format('YYYY-MM-DD');
+  }
+  /**
+   * 计算BMI
+   */
+  public computedBMI() {
+    if (this.userInfos.height && this.userInfos.weight) {
+      return Common.computedBMI(this.userInfos.height, this.userInfos.weight);
+    }
+  }
+  /**
+   * 修改用户姓名
+   */
+  public modifyUserName() {
+    this.$router.push({
+      path: '/modifyusername/' + this.userId,
+      query: {
+        username: this.userInfos.name,
+      },
+    });
+  }
+  /**
+   * 更换手机号
+   */
+  public modifyUserPhone() {
+    this.$router.push({
+      path: '/modifyuserphone/' + this.userId,
+      query: {
+        userphone: this.userInfos.phone,
+      },
+    });
+  }
+  /**
+   * 生日选择器
+   */
+  public showDatePicker() {
+    if (!this.datePicker) {
+      this.datePicker = this.$createDatePicker({
+        title: '选择生日',
+        min: new Date(1920, 1, 1),
+        max: new Date(2020, 9, 20),
+        value: new Date(this.userInfos.birthday),
+        onSelect: (date: Date, selectedVal: any, selectedText: string) => {
+          // 确定
+          this.userInfos.birthday = date.getTime();
+          this.modify();
+        },
+        onCancel: () => {
+          // 取消
+        },
+        columnCount: 3,
+        zIndex: 1000,
+        format: {
+          year: 'YYYY年',
+          month: 'MM月',
+          date: 'DD 日',
+        },
+      });
+    }
+    this.datePicker.show();
+  }
+  /**
+   * 性别选择器
+   */
+  public showSexPicker() {
+    if (!this.sexPicker) {
+      this.sexPicker = this.$createPicker({
+        title: '选择性别',
+        selectedIndex: [this.userInfos.sex],
+        data: [
+          [
+            {
+              text: '男',
+              value: '0',
+            },
+            {
+              text: '女',
+              value: '1',
+            },
+          ],
+        ],
+        onSelect: (
+          selectedVal: any,
+          selectedIndex: number,
+          selectedText: string,
+        ) => {
+          // 确定
+          this.userInfos.sex = selectedVal[0];
+          this.sexPicker = null;
+          this.modify();
+        },
+        onCancel: () => {
+          // 取消
+          this.sexPicker = null;
+        },
+      });
+      this.sexPicker.show();
+    }
+  }
+  /**
+   * 身高选择器
+   */
+  public showHeightPicker() {
+    if (!this.heightPicker) {
+      this.heightPicker = this.$createPicker({
+        title: '选择身高',
+        selectedIndex: [this.userInfos.height],
+        data: [this.heightArray],
+        onSelect: (
+          selectedVal: any,
+          selectedIndex: number,
+          selectedText: string,
+        ) => {
+          // 确定
+          this.userInfos.height = selectedVal[0];
+          this.heightPicker = null;
+          this.modify();
+        },
+        onCancel: () => {
+          // 取消
+          this.heightPicker = null;
+        },
+      });
+      this.heightPicker.show();
+    }
+  }
+  /**
+   * 体重选择器
+   */
+  public showWeightPicker() {
+    if (!this.weightPicker) {
+      console.log(224);
+      this.weightPicker = this.$createPicker({
+        title: '选择体重',
+        selectedIndex: [this.userInfos.weight],
+        data: [this.weightArray],
+        onSelect: (
+          selectedVal: any,
+          selectedIndex: number,
+          selectedText: string,
+        ) => {
+          // 确定
+          this.userInfos.weight = selectedVal[0];
+          this.weightPicker = null;
+          this.modify();
+        },
+        onCancel: () => {
+          // 取消
+          this.weightPicker = null;
+        },
+      });
+      this.weightPicker.show();
+    }
+  }
+  /**
+   * 确定修改
+   */
+  public modify() {
+    this.$server
+      .modify(
+        this.userId,
+        this.userInfos.name,
+        this.userInfos.sex,
+        this.getBirthday(this.userInfos.birthday),
+        this.userInfos.height,
+        this.userInfos.weight,
+      )
+      .then((res: BaseEntity.BaseEntityResult) => {});
+  }
+  /**
+   * 手机号格式
+   */
+  public changePhone(input: string) {
+    return Common.change(input);
+  }
+}
 </script>
 <style lang='scss' scoped>
   .userinfo {

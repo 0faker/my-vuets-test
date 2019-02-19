@@ -36,111 +36,98 @@
         @click="cancel"
       >取消</div>
     </div>
-    <div class="match_name">
-      <ul class="result">
+    <div
+      class="match_name"
+      v-if="showResult"
+    >
+      <ul
+        class="result"
+        v-if="matchCity.length!=0"
+      >
         <li
           v-for="items in matchCity"
-          @click="getCity(items.id,items.name)"
+          @click="chooseCity(items.id,items.name)"
           :key="items.id"
         >{{items.name}}</li>
       </ul>
+      <div
+        class="no_city"
+        v-else
+      >
+        暂无相关城市信息！
+      </div>
     </div>
 
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import pinyin from "pinyin";
-  import ls from "local-storage";
-  @Component
-  export default class SearchCity extends Vue {
-    searchCityName: string | null = null;
-    isCancel: boolean = false;
-    matchCity: any[] = [];
-    showClearButton: boolean = false;
-    cityLists: any[] = [];
-    mounted() {
-      this.formattingCityLists();
-    }
-    /**
-     * 初始化城市列表
-     */
-    formattingCityLists() {
-      //循环创建a-z数组
-      let arr: any[] = [];
-      for (let i of "ABCDEFGHIJKLMNOPGRSTUVWXYZ") {
-        arr.push({
-          name: i,
-          group: []
-        });
-      }
-      let cityList = ls.get("cityList");
-      cityList.forEach((element: any) => {
-        for (let k = 0; k < arr.length; k++) {
-          //所有首字母
-          element["initials"] = this.getInitials(element.name);
-          //全拼
-          element["pinyin"] = this.getPinyin(element.name);
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import ls from 'local-storage';
+import common from '../common/common';
+@Component
+export default class SearchCity extends Vue {
+  public searchCityName: string | null = null;
+  public isCancel: boolean = false;
+  public matchCity: any[] = [];
+  public showClearButton: boolean = false;
+  public showResult: boolean = false;
+  public cityLists: any[] = [];
+  public mounted() {
 
-          if (this.getInitials(element.name)[0] == arr[k].name) {
-            arr[k].group.push(element);
-            break;
+  }
+
+  /**
+   * 取消按钮
+   */
+  public cancel() {
+    this.$emit('cancel');
+  }
+  /**
+   * 清空搜索文字
+   */
+  public clear() {
+    this.searchCityName = null;
+    this.showResult = false;
+    this.matchCity = [];
+    this.showClearButton = this.searchCityName ? true : false;
+  }
+  /**
+   * 输入城市名
+   */
+  public inputCity(e: any) {
+    if (this.searchCityName != '' && this.searchCityName) {
+      this.searchCityName = e.target.value.replace(/^\s+|\s+$/g, '');
+      this.showClearButton = this.searchCityName ? true : false;
+      const cityList = ls.get('cityList');
+      this.matchCity = [];
+      cityList.forEach((element: any) => {
+        // // 所有首字母
+        // element.initials = common.getInitials(element.name);
+        // // 全拼
+        // element.pinyin = common.getPinyin(element.name);
+
+        if (this.searchCityName) {
+          if (
+            element.initials.indexOf(this.searchCityName.toUpperCase()) == 0 ||
+            element.name.indexOf(this.searchCityName) == 0 ||
+            element.pinyin.indexOf(this.searchCityName.toUpperCase()) == 0
+          ) {
+            this.matchCity.push(element);
           }
         }
       });
-      let cityResult: any[] = [];
-      // 遍历arr
-      arr.forEach((e: any) => {
-        if (e.group.length != 0) {
-          cityResult.push(e);
-        }
-      });
-      this.cityLists = cityResult;
-      console.log(this.cityLists);
-    }
-    /**
-     * 取消按钮
-     */
-    cancel() {
-      this.$emit("cancel");
-    }
-    /**
-     * 清空搜索文字
-     */
-    clear() {
-      this.searchCityName = null;
-      this.showClearButton = this.searchCityName ? true : false;
-    }
-    /**
-     * 输入城市名
-     */
-    inputCity(e: any) {
-      this.searchCityName = e.target.value.replace(/^\s+|\s+$/g, "");
-      this.showClearButton = this.searchCityName ? true : false;
-    }
-    getCity(id: number, name: string) {}
-    selectItem() {}
-    // 获取字符串首字母
-    getInitials(str: string) {
-      //小写转大写
-      return pinyin(str, {
-        style: pinyin.STYLE_FIRST_LETTER, // 设置拼音风格首字母风格
-        heteronym: false
-      })
-        .join("")
-        .toUpperCase();
-    }
-    // 获取字符串全拼音
-    getPinyin(str: string) {
-      //小写转大写
-      return pinyin(str, {
-        style: pinyin.STYLE_NORMAL, // 设置拼音风格普通风格，即不带声调。
-        heteronym: false
-      })
-        .join("")
-        .toUpperCase();
+      this.showResult = true;
+      console.log(this.matchCity);
+    } else {
+      this.matchCity = [];
+      this.showResult = false;
     }
   }
+  public chooseCity(id: number, name: string) {
+    console.log(name);
+    this.$emit('choose-city', id, name);
+  }
+}
 </script>
 <style lang='scss' scoped>
   .search_city {
@@ -217,9 +204,27 @@
         font-size: 1.5rem;
       }
     }
-    > .city_list {
-      height: 100%;
-      padding-bottom: 4.25rem;
+    > .match_name {
+      > .result {
+        > li {
+          padding: 0rem 1rem;
+          height: 3.66rem;
+          line-height: 3.66rem;
+          color: $baseRed;
+          font-size: 1.33rem;
+          font-weight: bolder;
+          border-bottom: 1px solid #eeeeee;
+        }
+      }
+      > .no_city {
+        padding: 0rem 1rem;
+        height: 3.66rem;
+        line-height: 3.66rem;
+        color: $basefontcolor2;
+        font-size: 1.33rem;
+        font-weight: bolder;
+        border-bottom: 1px solid #eeeeee;
+      }
     }
   }
 </style>

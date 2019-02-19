@@ -80,41 +80,41 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import moment from "moment";
-  import common from "../common/common";
-  @Component
-  export default class AccomplishedPrescription extends Vue {
-    id: string = ""; //康复记录id
-    dailyPrescriptions!: Prescriptions.PrescriptionsDetail;
-    loadding: boolean = false;
-    mounted() {
-      this.id = this.$route.params.id;
-      this.getAccomplishedPrescription();
-    }
-    /**
-     * 回到上页
-     */
-    back() {
-      this.$store.state.isBack = true;
-      this.$router.back();
-    }
-    getAccomplishedPrescription() {
-      this.$server.getAccomplishedPrescription(this.id).then(res => {
-        this.dailyPrescriptions = res.result;
-        this.loadding = true;
-      });
-    }
-    getExerciseType(input: string) {
-      return common.getExerciseType(input);
-    }
-    changeTime(input: string) {
-      return moment(input).format("HH.mm.ss");
-    }
-    getDate(input: number) {
-      return moment(input).format("YYYY.MM.DD");
-    }
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import moment from 'moment';
+import common from '../common/common';
+@Component
+export default class AccomplishedPrescription extends Vue {
+  public id: string = ''; // 康复记录id
+  public dailyPrescriptions!: Prescriptions.PrescriptionsDetail;
+  public loadding: boolean = false;
+  public mounted() {
+    this.id = this.$route.params.id;
+    this.getAccomplishedPrescription();
   }
+  /**
+   * 回到上页
+   */
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
+  }
+  public getAccomplishedPrescription() {
+    this.$server.getAccomplishedPrescription(this.id).then((res) => {
+      this.dailyPrescriptions = res.result;
+      this.loadding = true;
+    });
+  }
+  public getExerciseType(input: string) {
+    return common.getExerciseType(input);
+  }
+  public changeTime(input: string) {
+    return moment(input).format('HH.mm.ss');
+  }
+  public getDate(input: number) {
+    return moment(input).format('YYYY.MM.DD');
+  }
+}
 </script>
 <style lang='scss' scoped>
   main {

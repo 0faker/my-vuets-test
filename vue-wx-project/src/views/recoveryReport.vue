@@ -100,11 +100,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class RecoveryReportInfo extends Vue {
-    userid: string = '';
-    recordid: string = '';
-    repordInfo!: ReportInfo.ReportInfos;
-    loadding: boolean = false;
-    mounted() {
+    public userid: string = '';
+    public recordid: string = '';
+    public repordInfo!: ReportInfo.ReportInfos;
+    public loadding: boolean = false;
+    public mounted() {
     this.userid = this.$route.params.userid;
     this.recordid = this.$route.params.recordid;
     this.getReportInfo();
@@ -112,14 +112,14 @@ export default class RecoveryReportInfo extends Vue {
   /**
    * 回到上页
    */
-    back() {
+    public back() {
     this.$store.state.isBack = true;
     this.$router.back();
   }
   /**
    * 获取报告内容
    */
-    getReportInfo() {
+    public getReportInfo() {
     this.$server
       .getReportInfo(this.userid, this.recordid)
       .then((res: ReportInfo.ReportInfoResult) => {

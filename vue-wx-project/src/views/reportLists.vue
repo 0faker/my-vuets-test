@@ -62,11 +62,11 @@ import moment from 'moment';
 import ls from 'local-storage';
 @Component
 export default class ReportLists extends Vue {
-    id: string = '';
-    loadding: boolean = false;
-    reports: ReportInfo.ReportInfos[] = [];
+    public id: string = '';
+    public loadding: boolean = false;
+    public reports: ReportInfo.ReportInfos[] = [];
 
-    mounted() {
+    public mounted() {
     this.id = this.$route.params.id;
     console.log(this.id);
     this.getReportLists();
@@ -75,14 +75,14 @@ export default class ReportLists extends Vue {
   /**
    * 回到上页
    */
-    back() {
+    public back() {
     this.$store.state.isBack = true;
     this.$router.back();
   }
   /**
    * 获取报告列表
    */
-    getReportLists() {
+    public getReportLists() {
     this.$server
       .getReportLists(+this.id)
       .then((res: ReportInfo.ReportInfoLists) => {
@@ -93,14 +93,14 @@ export default class ReportLists extends Vue {
   /**
    * 时间戳=>字符串
    */
-    getAddTime(input: string) {
+    public getAddTime(input: string) {
     return moment(input).format('YYYY.MM.DD');
   }
 
   /**
    * 查看日处方
    */
-    check(id: number) {
+    public check(id: number) {
     this.$router.push({ path: '/report/' + this.id + '/' + id });
   }
 }

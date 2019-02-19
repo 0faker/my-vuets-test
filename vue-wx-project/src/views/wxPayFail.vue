@@ -42,9 +42,9 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  @Component
-  export default class WxPayFail extends Vue {}
+import { Component, Prop, Vue } from 'vue-property-decorator';
+@Component
+export default class WxPayFail extends Vue {}
 </script>
 <style lang='scss' scoped>
   .result {

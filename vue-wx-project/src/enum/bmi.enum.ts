@@ -1,12 +1,12 @@
 export enum BMIEnum {
- //过轻
+ // 过轻
  UNDERWEIGHT = 0,
- //健康
+ // 健康
  HEALTHY = 1,
- //过重
+ // 过重
  OVERWEIGHT = 2,
  // 肥胖
  FAT = 3,
  // 极度肥胖
- OBESE = 4
+ OBESE = 4,
 }

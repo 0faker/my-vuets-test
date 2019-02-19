@@ -1,6 +1,9 @@
 <template>
-  <div class="service_list">
-    <quick-loadmore
+  <div
+    class="service_list"
+    ref="serviceList"
+  >
+    <!-- <quick-loadmore
       :top-method="handleTop"
       ref="vueLoad"
       :top-status-change="handleStatusChange"
@@ -8,252 +11,272 @@
       :bottom-status-change="handleBottomStatusChange"
       :disable-top="false"
       :disable-bottom="false"
+    > -->
+    <div
+      class="scroll-list-wrap"
+      v-if="haveDoctor"
     >
-      <div
-        class="doctor_details"
-        v-for="(item,index) in doctorLists"
-        :key="index"
-        :class="{doctor_active:doctorActive==index}"
+      <cube-scroll
+        ref="scroll"
+        :data="doctorLists"
+        :options="options"
+        @pulling-down="onPullingDown"
+        @pulling-up="onPullingUp"
       >
-        <!-- 医生服务收起 -->
         <div
-          class="detail_push"
-          @click="checkDetail(item.id,index)"
+          class="doctor_details"
+          v-for="(item,index) in doctorLists"
+          :key="index"
+          :class="{doctor_active:doctorActive==index}"
         >
-          <div class="headimg">
-            <img
-              src="../assets/report_man_blue.png"
-              alt=""
-            >
-          </div>
-          <div class="doctor_infos">
-            <div class="infos_t">
-              <b>{{item.name}}</b><i>{{item.position}}</i>
-            </div>
-            <div class="hospital_pull"><img
-                src="../assets/ic_hospital.png"
+          <!-- 医生服务收起 -->
+          <div
+            class="detail_push"
+            @click="checkDetail(item.id,index,$event)"
+          >
+            <div class="headimg">
+              <img
+                src="../assets/report_man_blue.png"
                 alt=""
-              >{{item.hospitalName}} （{{item.departmentName}}）</div>
-            <ul
-              class="infos_b"
-              v-if="doctorActive!=index"
-            >
-              <li
-                class="clearfix"
-                v-for="category in item.categoryList"
-                :key="category.id"
               >
-                <span class="name">{{category.name}}</span>
-                <span class="bottomPrice">￥{{category.bottomPrice}}</span>
+            </div>
+            <div class="doctor_infos">
+              <div class="infos_t">
+                <b>{{item.name}}</b><i>{{item.position}}</i>
+              </div>
+              <div class="hospital_pull"><img
+                  src="../assets/ic_hospital.png"
+                  alt=""
+                >{{item.hospitalName}} （{{item.departmentName}}）</div>
+              <ul
+                class="infos_b"
+                v-if="doctorActive!=index"
+              >
+                <li
+                  class="clearfix"
+                  v-for="category in item.categoryList"
+                  :key="category.id"
+                >
+                  <span class="name">{{category.name}}</span>
+                  <span class="bottomPrice">￥{{category.bottomPrice}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="service_choose"
+            v-if="doctorActive==index"
+          >
+            <h3>特色服务选购</h3>
+            <!-- 种类 -->
+            <ul class="species">
+              <li
+                v-for="(items,index) in categoryList"
+                :key="items.id"
+                :class="{active:servicerActive==index}"
+                @click="selectService(index)"
+              >
+                <img
+                  v-if="servicerActive==index"
+                  :src="items.activeImg"
+                  alt=""
+                >
+                <img
+                  v-else
+                  :src="items.disactiveImg"
+                  alt=""
+                >
+                <div class="service_name">{{items.name}}</div>
+                <div class="remainingTimes">(剩余{{items.remainingTimes}}次)</div>
               </li>
             </ul>
+            <h4>请选择服务的规格：</h4>
+            <ul class="specifications">
+              <li
+                class="specification"
+                :class="{active:specificationActive==index}"
+                v-for="(item,index) in selectedService.productList"
+                :key="item.id"
+                @click="selectSpecification(index,item.id)"
+              >
+                <div>
+                  <div class="name">{{item.name}}</div>
+                  <div class="price">￥{{item.price}}</div>
+                </div>
+
+              </li>
+            </ul>
+            <button
+              class="pay"
+              @click="getOrder"
+            >购买</button>
           </div>
-        </div>
-        <div
-          class="service_choose"
-          v-if="doctorActive==index"
-        >
-          <h3>特色服务选购</h3>
-          <!-- 种类 -->
-          <ul class="species">
-            <li
-              v-for="(item,index) in doctorService"
-              :key="item.id"
-              :class="{active:servicerActive==index}"
-              @click="selectService(index)"
-            >
-              <img
-                v-if="servicerActive==index"
-                :src="item.activeImg"
-                alt=""
-              >
-              <img
-                v-else
-                :src="item.disactiveImg"
-                alt=""
-              >
-              <div class="service_name">{{item.name}}</div>
-              <div class="remainingTimes">(剩余{{item.remainingTimes}}次)</div>
-            </li>
-          </ul>
-          <h4>请选择服务的规格：</h4>
-          <ul class="specifications">
-            <li
-              class="specification"
-              :class="{active:specificationActive==index}"
-              v-for="(item,index) in selectedService.productList"
-              :key="item.id"
-              @click="selectSpecification(index)"
-            >
-              <div>
-                <div class="name">{{item.name}}</div>
-                <div class="price">{{item.price}}</div>
-              </div>
 
-            </li>
-          </ul>
-          <button
-            class="pay"
-            @click="pay"
-          >购买</button>
         </div>
-
-      </div>
-    </quick-loadmore>
+      </cube-scroll>
+    </div>
+    <main v-else>
+      <div class="no_doctor">暂未找到相关医生信息！</div>
+    </main>
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import ls from "local-storage";
+  import wxApi from "../common/wxConfig";
+  declare var wx: any;
   @Component
   export default class ServiceList extends Vue {
-    doctorActive: number = -1; //选中的医生
-    servicerActive: number = -1; //选中的服务
-    specificationActive: number = -1; //选中的规格
-    selectedService: any;
-    doctorLists: any = [
-      {
-        id: 2,
-        name: "小哈",
-        professionalTitle: "职称",
-        position: "职位",
-        departmentName: "心外科",
-        hospitalName: "创越医阿三大啊啊啊sdfsf的方式是否是啊啊院",
-        categoryList: [
-          { name: "信贷你", bottomPrice: 12345 },
-          { name: "信贷你", bottomPrice: 12345 }
-        ]
-      },
-      {
-        id: 1,
-        name: "小哈",
-        professionalTitle: "职称",
-        position: "职位",
-        departmentName: "心外科",
-        hospitalName: "创越医院"
-      }
-    ];
-    doctorService: any = [
-      {
-        id: 6,
-        name: "运动处方",
-        remainingTimes: 10,
-        activeImg: "/img/ic_rx_pay_s.png",
-        disactiveImg: "/img/ic_rx_pay_n.png",
-        productList: [
-          {
-            id: 26,
-            name: "1次",
-            price: 100,
-            defaultNum: 1
-          },
-          {
-            id: 27,
-            name: "4次",
-            price: 200,
-            defaultNum: 4
-          },
-          {
-            id: 28,
-            name: "8次",
-            price: 300,
-            defaultNum: 8
-          },
-          {
-            id: 29,
-            name: "12次",
-            price: 400,
-            defaultNum: 12
-          }
-        ]
-      },
-      {
-        id: 7,
-        name: "心电分析",
-        remainingTimes: 0,
-        activeImg: "/img/ic_hr_anasysis_pay_s.png",
-        disactiveImg: "/img/ic_hr_anasysis_pay_n.png",
-        productList: [
-          {
-            id: 30,
-            name: "1次",
-            price: 100,
-            defaultNum: 1
-          },
-          {
-            id: 31,
-            name: "4次",
-            price: 200,
-            defaultNum: 4
-          },
-          {
-            id: 32,
-            name: "8次",
-            price: 300,
-            defaultNum: 8
-          },
-          {
-            id: 33,
-            name: "12次",
-            price: 500,
-            defaultNum: 12
-          }
-        ]
-      }
-    ];
-    mouneted() {
-      this.addServiceImg();
+    public doctorActive: number = -1; // 选中的医生
+    public servicerActive: number = -1; // 选中的服务
+    public specificationActive: number = -1; // 选中的规格
+    public specificationActiveId: number = -1; // 选中的规格服务id
+    public selectedService: any;
+    public patientId!: number;
+    public doctorId!: number;
+    public categoryList: any[] = [];
+    public doctorLists: any = [];
+    public haveDoctor: boolean = false;
+    public viewHeight!: number; // 可视区域高度
+    public options: any = {};
+    PullingUp: boolean = true;
+    @Prop() public doctorService: any;
+    @Watch("doctorService")
+    public onDoctorService(val: string, oldVal: string) {
+      this.doctorLists = val;
+      this.haveDoctor = this.doctorLists.length == 0 ? false : true;
+    }
+    @Watch("isPullingUp")
+    public onIsPullingUp(val: boolean, oldVal: boolean) {
+      this.PullingUp = val;
+    }
+
+    created() {
+      this.options = {
+        pullDownRefresh: false,
+        pullUpLoad: {
+          text: "加载成功"
+        },
+        scrollY: true
+      };
+    }
+    public mouneted() {
+      // this.viewHeight = document.documentElement.clientHeight;
     }
     /**
      * 在服务类别中添加对应图片
      */
-    addServiceImg() {
-      this.doctorService.forEach((element: any) => {
-        // if (element.id == 6) {
-        //   element.activeImg = "../assets/ic_rx_pay_s.png";
-        //   element.disactiveImg = "../assets/ic_rx_pay_n.png";
-        // } else if (element.id == 7) {
-        //   element.activeImg = "/assets/ic_hr_anasysis_pay_s.png";
-        //   element.disactiveImg = "/assets/ic_hr_anasysis_pay_s.png";
-        // }
+    public addServiceImg() {
+      this.categoryList.forEach((element: any) => {
+        if (element.id == 7) {
+          element.activeImg = "/img/ic_rx_pay_s.png";
+          element.disactiveImg = "/img/ic_rx_pay_n.png";
+        } else if (element.id == 8) {
+          element.activeImg = "/img/ic_hr_anasysis_pay_s.png";
+          element.disactiveImg = "/img/ic_hr_anasysis_pay_n.png";
+        }
       });
     }
     /**
      * 打开具体医生服务
      */
-    checkDetail(id: number, index: number) {
-      this.doctorActive = index;
-      //默认选中第一个服务
-      this.selectService(0);
+    public checkDetail(id: number, index: number, e: MouseEvent) {
+      this.patientId = ls.get("payPatient");
+      // 重复点击
+      if (this.doctorActive !== index) {
+        this.doctorId = id;
+        this.$server.GetCommonDoctorService(id, this.patientId).then(data => {
+          this.categoryList = data.result;
+          this.addServiceImg();
+          this.selectService(0);
+          this.doctorActive = index;
+        });
+      } else {
+        this.doctorActive = -1;
+      }
+
+      // 默认选中第一个服务
     }
     /**
      * 选择服务类型
      */
-    selectService(index: number) {
-      console.log(index);
+    public selectService(index: number) {
       this.servicerActive = index;
-      this.selectedService = this.doctorService[index];
-      this.selectSpecification(0);
+      this.selectedService = this.categoryList[index];
+      this.selectSpecification(0, this.selectedService.productList[0].id);
     }
     /**
      * 选择规格
      */
-    selectSpecification(index: number) {
+    public selectSpecification(index: number, id: number | null = null) {
+      if (id) {
+        this.specificationActiveId = id;
+      }
       this.specificationActive = index;
+    }
+    /**
+     * 生成订单
+     */
+    getOrder() {
+      this.$server
+        .GetPayOrder(this.specificationActiveId, this.doctorId, this.patientId)
+        .then(res => {
+          const orderId = res.result.id;
+          this.pay(orderId);
+        });
     }
     /**
      * 购买
      */
-    pay() {}
-    handleStatusChange() {}
-    handleBottom() {}
-    handleBottomStatusChange() {}
-    handleTop() {}
+    public pay(orderId: number) {
+      const openId = ls.get("openId");
+
+      this.$server.GetWxPaySignature(orderId, openId).then((res: any) => {
+        const paySign = JSON.parse(res.result);
+        wx.chooseWXPay({
+          // appid: "wxc1755ba87a7baa57",
+          timestamp: paySign.timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+          nonceStr: paySign.nonceStr, // 支付签名随机串，不长于 32 位
+          package: paySign.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
+          signType: "MD5", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+          paySign: paySign.sign, // 支付签名
+          success: (respose: any) => {
+            // 支付成功后的回调函数
+            this.$router.push({ path: "/wxpaysuccess" });
+          },
+          fail: function(error: any) {
+            this.$router.push({ path: "/wxpayfail" });
+            //
+          }
+        });
+      });
+      // wxApi.wxPayConfig()
+    }
+    /**
+     * 下拉
+     */
+    public onPullingDown() {
+      this.$emit("PullingUp");
+    }
+    /**
+     * 上拉
+     */
+    public onPullingUp() {
+      if (this.PullingUp) {
+        this.$emit("PullingUp");
+      } else {
+        this.doctorLists = this.doctorLists;
+      }
+    }
   }
 </script>
 <style lang='scss' scoped>
   .service_list {
     // background-color: #f40;
     padding: 1rem;
+    > .scroll-list-wrap {
+      height: 40rem;
+    }
     .doctor_details {
       transition: all 0.5s;
       border-radius: 4px;
@@ -394,7 +417,7 @@
           justify-content: space-between;
           > .specification {
             width: 49%;
-            margin: 1rem 0;
+            margin: 0.5rem 0;
             > div {
               padding: 0.825rem 1rem;
               border-radius: 0.34rem;
@@ -459,6 +482,14 @@
             border-radius: 50%;
           }
         }
+      }
+    }
+    > main {
+      > .no_doctor {
+        font-size: 1.33rem;
+        margin-top: 3.67rem;
+        text-align: center;
+        font-family: PingFangSC;
       }
     }
   }

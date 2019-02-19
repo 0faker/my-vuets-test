@@ -240,7 +240,7 @@ body {
   >.header-r {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 1rem;
     // width: 3rem;
     font-size: 1.25rem;
     height: 100%;
@@ -260,10 +260,10 @@ body {
   &:after {
     position: absolute;
     content: "";
-    top: 0%;
+    top: 15%;
     left: 0%;
-    width: 0.6rem;
-    height: 100%;
+    width: 0.65rem;
+    height: 70%;
     background-color: #262e4f;
   }
 

@@ -52,23 +52,23 @@ import moment from 'moment';
 import ls from 'local-storage';
 @Component
 export default class CyclePrescriptionLists extends Vue {
-    id: string = '';
-    cyclePrescriptions: Prescriptions.CyclePrescriptions[] = [];
-    mounted() {
+    public id: string = '';
+    public cyclePrescriptions: Prescriptions.CyclePrescriptions[] = [];
+    public mounted() {
     this.id = this.$route.params.id;
     this.getCyclePrescriptions();
   }
   /**
    * 回到上页
    */
-    back() {
+    public back() {
         this.$store.state.isBack = true;
         this.$router.back();
   }
   /**
    * 获取周期处方
    */
-    getCyclePrescriptions() {
+    public getCyclePrescriptions() {
     this.$server
       .getCyclePrescriptions(+this.id)
       .then((res: Prescriptions.CyclePrescriptions[]) => {
@@ -79,13 +79,13 @@ export default class CyclePrescriptionLists extends Vue {
   /**
    * 时间戳=>字符串
    */
-    getAddTime(input: string) {
+    public getAddTime(input: string) {
     return moment(input).format('YYYY.MM.DD');
   }
   /**
    * 查看日处方
    */
-    check(id: number) {
+    public check(id: number) {
     ls.set('cyclePrescriptions', this.cyclePrescriptions);
     this.$router.push({ path: '/cycleprescription/' + id });
   }

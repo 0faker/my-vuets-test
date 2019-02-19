@@ -55,18 +55,32 @@
   import ls from "local-storage";
   @Component
   export default class ChoosePatient extends Vue {
-    phoneNumber: string = ""; //手机号
-    phone: string = ""; //手机号字符串344格式
-    isHavePatient: boolean = false; //验证码显示
-    isSend: boolean = false; //是否已请求发送验证码
-    code: string = ""; //验证码
-    codeWords: string = "获取验证码";
-    isShowButton: boolean = false; //显示购买按钮
-    patientId: string = ""; //患者id
+    public phoneNumber: string = ""; // 手机号
+    public phone: string = ""; // 手机号字符串344格式
+    public isHavePatient: boolean = false; // 验证码显示
+    public isSend: boolean = false; // 是否已请求发送验证码
+    public code: string = ""; // 验证码
+    public codeWords: string = "获取验证码";
+    public isShowButton: boolean = false; // 显示购买按钮
+    public patientId: string = ""; // 患者id
+    created() {
+      this.getOpenid();
+    }
+    /**
+     * 获取openid
+     */
+    getOpenid() {
+      const Code: string = this.$route.query.code.toString();
+      this.$server.GetOpenid(Code).then((res: any) => {
+        // this.openId = res.result;
+        // 保存openid
+        ls.set("openId", res.result);
+      });
+    }
     /*
      * 验证手机号
      */
-    reg(e: Event) {
+    public reg(e: Event) {
       this.phone = common.change(this.phone);
       this.phoneNumber = this.phone.replace(/\s+/g, "");
       if (common.regPhone(+this.phoneNumber)) {
@@ -86,13 +100,13 @@
     /**
      * 发送验证码
      */
-    send() {
+    public send() {
       this.$server.loginTest(this.phoneNumber).then(data => {
-        //发送成功
+        // 发送成功
         if (data.code == "C200") {
           this.isSend = false;
           let secend = 60;
-          let timer = setInterval(() => {
+          const timer = setInterval(() => {
             secend--;
             this.codeWords = secend + "s";
             if (secend == 0) {
@@ -107,7 +121,7 @@
     /**
      * 验证 验证码 判断是否为4位数
      */
-    codekeyup() {
+    public codekeyup() {
       if (this.code.length != 4) {
         this.isShowButton = false;
       } else {
@@ -117,13 +131,13 @@
     /**
      * 注册用户
      */
-    register() {
+    public register() {
       this.$server.RegistPatient(this.phoneNumber, this.code);
     }
     /**
      * 点击购买 跳转页面
      */
-    buy() {
+    public buy() {
       ls.set("payPatient", this.patientId);
       this.$router.push({ path: `/chooseservice` });
     }

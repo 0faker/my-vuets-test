@@ -1,5 +1,7 @@
 /* 日历控件样式 */
 .wh_container {
+ // height: 28rem;
+
  >.wh_content_all {
   background-color: #000 !important;
 
@@ -13,8 +15,14 @@
    color: #000;
   }
 
+  .clearchooseday {
+   background-color: #000 !important;
+   color: #fff !important;
+  }
  }
 }
+
+
 
 .wh_content {
  justify-content: space-around

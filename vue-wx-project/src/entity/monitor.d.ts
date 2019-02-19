@@ -1,4 +1,4 @@
-declare module Monitor {
+declare namespace Monitor {
  export interface MonitorInfo {
   startTime: string;
   // 开始运动时间
@@ -26,8 +26,8 @@ declare module Monitor {
   // 有效运动时长 单位:秒;(注意单位转换)
   schemeName: string;
   // 采用的方案类型 I期 II期等
-  //-----------ui------
-  allTime: number;//运动总时长
-  effectiveMotionTimeRate: string;//有效运动时长占比
+  // -----------ui------
+  allTime: number; // 运动总时长
+  effectiveMotionTimeRate: string; // 有效运动时长占比
  }
 }

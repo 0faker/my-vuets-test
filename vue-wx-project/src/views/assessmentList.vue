@@ -18,8 +18,19 @@
         <div class="title">
           评价记录
         </div>
-        <div class="header-r">
+        <div
+          v-if="isGetAll"
+          class="header-r"
+          @click="clickToday"
+        >
           回到当天
+        </div>
+        <div
+          v-else
+          class="header-r"
+          @click="getAll"
+        >
+          全部
         </div>
       </div>
       <!--  
@@ -27,25 +38,30 @@
   :futureDayHide='1525104000' //某个日期以后的不允许点击  时间戳10位
   -->
       <calendar
+        ref="Calendar"
         @choseDay="clickDay"
         @changeMonth="changeDate"
         :futureDayHide='nowDate'
         :topText="['周日','周一', '周二', '周三', '周四', '周五', '周六']"
+        :markDateMore="markDate"
       ></calendar>
       <!-- <div>
       收起日历
     </div> -->
-      <div class="scroll-list-wrap">
+      <div
+        class="scroll-list-wrap"
+        v-if="ishavedate"
+      >
         <cube-scroll
           ref="scroll"
-          :data="AccomplishList"
+          :data="AssessmentList"
           :options="options"
           @pulling-down="onPullingDown"
           @pulling-up="onPullingUp"
         >
           <ul>
             <li
-              v-for="item in AccomplishList"
+              v-for="item in AssessmentList"
               :key="item.id"
             >
               <div class="datetime">{{getDate(item.date,'d')}}</div>
@@ -66,6 +82,12 @@
           </ul>
         </cube-scroll>
       </div>
+      <div
+        class="dataTips"
+        v-else
+      >
+        {{tips}}
+      </div>
     </div>
   </cube-scroll>
 </template>
@@ -73,57 +95,84 @@
   import { Component, Prop, Vue } from "vue-property-decorator";
   import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
   import common from "../common/common";
+  import moment from "moment";
   @Component({
     components: {
       Calendar
     }
   })
   export default class AssessmentList extends Vue {
-    nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
-    id: string = "";
-    currentPageNo: number = 1;
-    pageSize: number = 10;
-    prescriptionDate: string | null = null;
-    AccomplishList: Accomplished.AccomplishedInstance[] = []; // 记录列表
-    AccomplishListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
-    options: any = {};
-    mounted() {
+    public nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
+    public id: string = "";
+    public currentPageNo: number = 1;
+    public pageSize: number = 10;
+    public prescriptionDate: string | null = null;
+    public AssessmentList: Accomplished.AccomplishedInstance[] = []; // 记录列表
+    public AssessmentListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
+    public options: any = {};
+    tips: string = "";
+    ishavedate: boolean = false;
+    isGetAll: boolean = true;
+    markDate: any[] = [];
+    maxPage: number = 1;
+    public mounted() {
       this.id = this.$route.params.id;
-      this.getPrenventList();
+      this.initialize();
+      this.getAssessmentList();
     }
     /**
      * 回到上页
      */
-    back() {
+    public back() {
       this.$store.state.isBack = true;
       this.$router.back();
     }
     // 初始化
-    initialize() {
+    public initialize() {
       this.options = {
-        pullDownRefresh: {
-          txt: "刷新成功"
-        },
+        // pullDownRefresh: true,
         pullUpLoad: {
           text: "加载成功"
         },
         scrollY: true
       };
     }
-    clickDay(data: any) {
-      console.log(this.nowDate);
-      console.log(data); // 选中某天
+    public clickDay(data: any) {
+      this.markDate = [];
+      this.isGetAll = false;
+      this.prescriptionDate = data.split("/").join("-");
+      this.currentPageNo = 1;
+      // 清空数据
+      this.AssessmentList = [];
+      this.AssessmentListResult = [];
+      this.getAssessmentList();
     }
-    changeDate(data: any) {
+    public changeDate(data: any) {
       console.log(data); // 左右点击切换月份
     }
-    clickToday(data: any) {
+    public clickToday(data: any) {
       console.log(data); // 跳到了本月
+      let date = moment().format("YYYY/MM/DD");
+      console.log(date); // 跳到了本月
+      this.markDate = [];
+      (this.$refs.Calendar as Calendar).ChoseMonth(date);
+    }
+    getAll() {
+      this.markDate = [
+        { date: this.prescriptionDate, className: "clearchooseday" }
+      ];
+      this.isGetAll = true;
+      this.prescriptionDate = null;
+      this.currentPageNo = 1;
+      // 清空数据
+      this.AssessmentList = [];
+      this.AssessmentListResult = [];
+      this.getAssessmentList();
     }
     /**
      * 监测记录列表
      */
-    getPrenventList() {
+    public getAssessmentList() {
       this.$server
         .getAssessmentList(
           this.id,
@@ -132,37 +181,55 @@
           this.pageSize
         )
         .then(res => {
-          this.AccomplishListResult = this.AccomplishListResult.concat(
+          this.AssessmentListResult = this.AssessmentListResult.concat(
             res.result
           );
-          this.AccomplishList = common.changeMsg(this.AccomplishListResult);
-          console.log(this.AccomplishList);
+          this.AssessmentList = common.changeMsg(this.AssessmentListResult);
+          console.log(this.AssessmentList);
+          this.maxPage = res.totalPage;
+          if (this.AssessmentList.length == 0) {
+            this.ishavedate = false;
+            this.tips = this.isGetAll
+              ? "暂无您的亲属的评价记录！"
+              : "您的亲属今天没有评价记录！";
+            console.log(this.tips);
+          } else {
+            this.ishavedate = true;
+          }
         });
     }
     /**
      * 下拉
      */
-    onPullingDown() {}
+    public onPullingDown() {}
     /**
      * 上拉
      */
-    onPullingUp() {}
+    public onPullingUp() {
+      if (this.maxPage > this.currentPageNo) {
+        this.currentPageNo++;
+        this.getAssessmentList();
+      } else {
+        // this.PreventList = this.PreventList;
+        (this.$refs.scroll as any).forceUpdate();
+      }
+    }
     /**
      *  秒=>时分秒
      */
-    changeSEC(input: number) {
+    public changeSEC(input: number) {
       return common.changeSEC(input);
     }
     /**
      * 转换时间戳
      */
-    getDate(input: number, type: string) {
+    public getDate(input: number, type: string) {
       return common.getDate(input, type);
     }
     /**
      * 计算总时长
      */
-    getTotalTime(data: any) {
+    public getTotalTime(data: any) {
       let result = 0;
       for (const i in data) {
         result += data[i].totalExerciseTime;
@@ -172,7 +239,7 @@
     /**
      * 评价详情
      */
-    getDetail(id: number) {
+    public getDetail(id: number) {
       this.$router.push({
         path: "/assessmentinfo/" + id
       });
@@ -183,13 +250,14 @@
   .accomplished {
     height: 100%;
     // overflow: hidden;
-    display: flex;
+    // display: flex;
     flex-direction: column;
 
     // overflow-y: scroll;
     > .scroll-list-wrap {
       // height: 100%;
-      flex: 1;
+      height: 20rem;
+      // flex: 1;
       ul {
         padding: 0rem 0.66rem;
         background-color: #f3f3f3;
@@ -245,6 +313,10 @@
           }
         }
       }
+    }
+    .dataTips {
+      margin-top: 5rem;
+      text-align: center;
     }
   }
 </style>

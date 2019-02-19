@@ -1,4 +1,4 @@
-declare module Assessment {
+declare namespace Assessment {
  export interface AssessmentInfo {
   patient: Patient.PatientInfo;
   preventiveScheme: PreventiveScheme;
@@ -27,7 +27,7 @@ declare module Assessment {
   preBorg: number;
   borg: number;
   borgCategory: {
-   id: number
+   id: number,
   };
   hardwareVersion: string;
   firmwareVersion: string;

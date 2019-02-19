@@ -24,7 +24,7 @@
       <div class="main_h">
         <div
           class=""
-          @click="go('three')"
+          @click="check"
         >
           <img
             src="../assets/three_min.png"
@@ -94,44 +94,52 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import METsChart from "@/components/METsChart.vue";
-  import common from "../common/common";
-  @Component({
-    components: {
-      METsChart
-    }
-  })
-  export default class MonitorInfo extends Vue {
-    id: string = "";
-    IndependentMonitoring!: Monitor.MonitorInfo;
-    //------ui-------
-    loadding: boolean = false;
-    /**
-     * 回到上页
-     */
-    back() {
-      this.$store.state.isBack = true;
-      this.$router.back();
-    }
-    mounted() {
-      this.id = this.$route.params.id;
-      this.getMonitorInfo();
-    }
-    getMonitorInfo() {
-      this.$server.getMonitorInfo(this.id).then(res => {
-        this.IndependentMonitoring = res.result;
-        this.loadding = true;
-      });
-    }
-    /**
-     * 清除弹层
-     */
-    cancel() {}
-    getMin(input: number) {
-      return common.changeSEC(input);
-    }
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import METsChart from '@/components/METsChart.vue';
+import common from '../common/common';
+@Component({
+  components: {
+    METsChart,
+  },
+})
+export default class MonitorInfo extends Vue {
+  public id: string = '';
+  public IndependentMonitoring!: Monitor.MonitorInfo;
+  // ------ui-------
+  public loadding: boolean = false;
+  /**
+   * 回到上页
+   */
+  public back() {
+    this.$store.state.isBack = true;
+    this.$router.back();
   }
+  public mounted() {
+    this.id = this.$route.params.id;
+    this.getMonitorInfo();
+  }
+  public getMonitorInfo() {
+    this.$server.getMonitorInfo(this.id).then((res) => {
+      this.IndependentMonitoring = res.result;
+      this.loadding = true;
+    });
+  }
+  /**
+   * 查看三分钟心电记录
+   */
+  public check() {
+    this.$router.push({
+      path: '/threeminutesrecords/' + this.id,
+    });
+  }
+  /**
+   * 清除弹层
+   */
+  public cancel() {}
+  public getMin(input: number) {
+    return common.changeSEC(input);
+  }
+}
 </script>
 <style lang='scss' scoped>
   .monitor_info {
@@ -184,7 +192,7 @@
       }
       > .situation {
         margin-top: 1rem;
-        > div{
+        > div {
           text-align: left;
           color: #262e4f;
           font-size: 1.335rem;
