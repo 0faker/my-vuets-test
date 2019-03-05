@@ -102,111 +102,121 @@
 </template>
 
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import ls from 'local-storage';
-import METsChart from '@/components/METsChart.vue';
-@Component({
-  components: {
-    METsChart,
-  },
-})
-export default class PreventInfo extends Vue {
-  public id: string = '';
-  public preventive!: Prevent.PreventInfo;
-  public effctiveRate!: number;
-  public standard: boolean = false;
-  public borg: any;
-  public isQualified: boolean = true; // 是否达标
-  // -----ui------
-  public loadding: boolean = false;
-  public created() {
-    this.getBorg();
-  }
-  public mounted() {
-    this.initialize();
-    this.getPreventiveInfo();
-  }
-  public back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-  // 初始化
-  public initialize() {
-    this.id = this.$route.params.id;
-  }
-  /**
-   * 获取预防
-   */
-  public getPreventiveInfo() {
-    this.$server.getPreventiveInfo(this.id).then((res) => {
-      this.preventive = res.result;
-      this.effctiveRate =
-        // 向下取整保留一位小数
-        Math.floor(
-          (this.preventive.effectiveTime /
-            (this.preventive.preventiveScheme.trainTime * 60)) *
-            1000,
-        ) / 10;
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import ls from "local-storage";
+  import METsChart from "@/components/METsChart.vue";
+  @Component({
+    components: {
+      METsChart
+    },
+    name: "infos"
+  })
+  export default class PreventInfo extends Vue {
+    public id: string = "";
+    public preventive!: Prevent.PreventInfo;
+    public effctiveRate!: number;
+    public standard: boolean = false;
+    public borg: any;
+    public isQualified: boolean = true; // 是否达标
+    // -----ui------
+    public loadding: boolean = false;
+    public created() {
+      this.getBorg();
+    }
+    public mounted() {
+      this.initialize();
+      // this.getPreventiveInfo();
+    }
+    activated() {
+      this.id = this.$route.params.id;
+      this.$store.state.isBack = false;
+    }
+    deactivated() {}
+    @Watch("id")
+    getdata() {
+      this.getPreventiveInfo();
+    }
+    public back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    // 初始化
+    public initialize() {
+      this.id = this.$route.params.id;
+    }
+    /**
+     * 获取预防
+     */
+    public getPreventiveInfo() {
+      this.$server.getPreventiveInfo(this.id).then(res => {
+        this.preventive = res.result;
+        this.effctiveRate =
+          // 向下取整保留一位小数
+          Math.floor(
+            (this.preventive.effectiveTime /
+              (this.preventive.preventiveScheme.trainTime * 60)) *
+              1000
+          ) / 10;
 
-      this.isQualified = this.effctiveRate >= 100 ? true : false;
-      this.loadding = true;
-    });
-  }
-  /**
-   * 获取borg表id
-   */
-  public getBorgId(input: number) {
-    return input === 1 ? '自测疲劳感为' : '自我理解的用力程度为';
-  }
-  /**
-   * 获取borg表内容
-   */
-  public getBorg() {
-    const borg = ls.get('borg');
-    // localstorage中有borg表
-    if (borg) {
-      this.borg = borg;
-    } else {
-      this.$server.getBorg().then((res) => {
-        this.borg = res.result;
-        ls.set('borg', this.borg);
+        this.isQualified = this.effctiveRate >= 100 ? true : false;
+        this.loadding = true;
       });
     }
-  }
-  /**
-   * borg值=>文字
-   */
-  public borgRepresent(input: number) {
-    let result: string = '';
-    // 本次所用的borg表
-    const currentBorg = JSON.parse(
-      this.borg.find((x: any) => x.id === this.preventive.borgCategory.id)
-        .borgContent,
-    );
-    result = currentBorg.find((x: any) => x.value === input).description;
-    return result;
-  }
-  /**
-   * 秒数=>分钟
-   * 向下取整
-   */
-  public getMin(time: number) {
-    return Math.floor(time / 60);
-  }
-  /**
-   * 路由跳转
-   */
-  public route(input: string) {
-    switch (input) {
-      case 'plan':
-        ls.set('assessmentpreventplan', this.preventive.preventiveScheme);
-        this.$router.push({
-          path: '/preventplan/' + this.id,
+    /**
+     * 获取borg表id
+     */
+    public getBorgId(input: number) {
+      return input === 1 ? "自测疲劳感为" : "自我理解的用力程度为";
+    }
+    /**
+     * 获取borg表内容
+     */
+    public getBorg() {
+      const borg = ls.get("borg");
+      // localstorage中有borg表
+      if (borg) {
+        this.borg = borg;
+      } else {
+        this.$server.getBorg().then(res => {
+          this.borg = res.result;
+          ls.set("borg", this.borg);
         });
-        break;
+      }
+    }
+    /**
+     * borg值=>文字
+     */
+    public borgRepresent(input: number) {
+      let result: string = "";
+      // 本次所用的borg表
+      const currentBorg = JSON.parse(
+        this.borg.find((x: any) => x.id === this.preventive.borgCategory.id)
+          .borgContent
+      );
+      result = currentBorg.find((x: any) => x.value === input).description;
+      return result;
+    }
+    /**
+     * 秒数=>分钟
+     * 向下取整
+     */
+    public getMin(time: number) {
+      return Math.floor(time / 60);
+    }
+    /**
+     * 路由跳转
+     */
+    public route(input: string) {
+      switch (input) {
+        case "plan":
+          ls.set("assessmentpreventplan", this.preventive.preventiveScheme);
+          this.$router.push({
+            path: "/preventplan/" + this.id
+          });
+          break;
+      }
     }
   }
-}
 </script>
 <style lang='scss' scoped>
   i {
@@ -218,10 +228,11 @@ export default class PreventInfo extends Vue {
 
   .prevent_info {
     position: relative;
-    padding-top: $header-height;
+    // padding-top: $header-height;
+    height: 100%;
     background-color: #f7f7f7;
     > .header {
-      position: fixed;
+      position: absolute;
       width: 100%;
       transform: all 0.5s;
       opacity: 1;
@@ -230,6 +241,11 @@ export default class PreventInfo extends Vue {
     }
     > main {
       padding: 1rem;
+      padding-top: 4.75rem;
+      height: 100%;
+      overflow: hidden;
+      overflow-y: scroll;
+      box-sizing: border-box;
       > .main_h {
         height: 6.665rem;
         // background: #000;

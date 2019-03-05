@@ -49,8 +49,16 @@
           <div>
             <span class="name">姓名: <i>{{assessment.patient.name}}</i></span>
             <span class="sex">
-              <!-- <img id="sexImg" v-if="assessment.patient.sex== 0" src="../assets/ic_male@2x.png"> -->
-              <!-- <img id="sexImg" v-if="assessment.patient.sex==1" src="../assets/ic_female.png"> -->
+              <!-- <img
+                id="sexImg"
+                v-if="assessment.patient.sex== 0"
+                src="../assets/ic_male@2x.png"
+              >
+              <img
+                id="sexImg"
+                v-if="assessment.patient.sex==1"
+                src="../assets/ic_female.png"
+              > -->
             </span>
             <span class="age">{{setAge(assessment.age)}}</span>
           </div>
@@ -246,196 +254,211 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import moment from 'moment';
-import ls from 'local-storage';
-import common from '../common/common';
-@Component
-export default class AssessmentInfo extends Vue {
-  public id: string = '';
-  public assessment!: Assessment.AssessmentInfo;
-  public distanceLevelcolor: string = '';
-  public hrInterval: any[] = [];
-  public borg: any[] = [];
-  public borgContentArray: any[] = []; // borg表弹窗数据
-  // -----ui-----
-  public isShowDistance: boolean = false;
-  public isShowBorgDialog: boolean = false;
-  public loadding: boolean = false;
-  public created() {
-    this.getBorg();
-  }
-  public mounted() {
-    this.id = this.$route.params.id;
-    this.getAssessmentInfo();
-  }
-  /**
-   * 回到上页
-   */
-  public back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-  /**
-   * 获取borg表内容
-   */
-  public getBorg() {
-    const borg = ls.get('borg');
-    // localstorage中有borg表
-    if (borg) {
-      this.borg = borg;
-    } else {
-      this.$server.getBorg().then((res) => {
-        this.borg = res.result;
-        ls.set('borg', this.borg);
-      });
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import moment from "moment";
+  import ls from "local-storage";
+  import common from "../common/common";
+  @Component({
+    name: "infos"
+  })
+  export default class AssessmentInfo extends Vue {
+    public id: string = "";
+    public assessment!: Assessment.AssessmentInfo;
+    public distanceLevelcolor: string = "";
+    public hrInterval: any[] = [];
+    public borg: any[] = [];
+    public borgContentArray: any[] = []; // borg表弹窗数据
+    // -----ui-----
+    public isShowDistance: boolean = false;
+    public isShowBorgDialog: boolean = false;
+    public loadding: boolean = false;
+    public created() {
+      this.getBorg();
     }
-  }
-  public getAssessmentInfo() {
-    this.$server.getAssessmentInfo(this.id).then((res) => {
-      this.assessment = res.result;
-      this.hrInterval = JSON.parse(this.assessment.hrInterval);
-      this.loadding = true;
-    });
-  }
-  /**
-   * 关闭弹层
-   */
-  public cancel() {
-    this.isShowDistance = false;
-    this.isShowBorgDialog = false;
-  }
-  /**
-   * 年龄
-   */
-  public setAge(age: number) {
-    return age ? age + '岁' : '--';
-  }
-  /**
-   * 身高
-   */
-  public setHeight(height: number) {
-    return height ? height + 'cm' : '--';
-  }
-  /**
-   * 体重
-   */
-  public setWeight(weight: number) {
-    return weight ? weight + 'kg' : '--';
-  }
-  /**
-   * bmi+对应体重状态
-   */
-  public countBmiDes(bmi: number) {
-    return bmi + common.BMIExplain(bmi);
-  }
-  /**
-   * 年月日时间
-   */
-  public countTime(startTime: number) {
-    return moment(startTime).format('YYYY.MM.DD');
-  }
-  /**
-   * 时分秒
-   */
-  public getTimetDduration(startTime: number, endTime: number) {
-    return (
-      moment(startTime).format('HH.mm.ss') +
-      '-' +
-      moment(endTime).format('HH.mm.ss')
-    );
-  }
-  /**
-   * 步行等级和颜色
-   */
-  public distanceLevel(input: number) {
-    const result = {
-      type: '',
-      color: '',
-    };
-    if (input < 300) {
-      result.type = 'I级';
-      result.color = '#d20505';
-    } else if (input >= 300 && input < 375) {
-      result.type = 'II级';
-      result.color = '#f87931';
-    } else if (input >= 375 && input < 450) {
-      result.type = 'III级';
-      result.color = '#f5a623';
-    } else {
-      result.type = 'IV级';
-      result.color = '#f8e71c';
+    public mounted() {
+      this.id = this.$route.params.id;
+      // this.getAssessmentInfo();
     }
-    this.distanceLevelcolor = result.color;
-    return result;
-  }
-  /**
-   * 距离borg弹窗
-   */
-  public showBorgDistance() {
-    this.isShowDistance = this.isShowDistance ? false : true;
-    this.isShowBorgDialog = false;
-  }
-  /**
-   * 疲劳感borg弹窗
-   */
-  public showBorgInfoDialog() {
-    this.borgContentArray = JSON.parse(
-      this.borg.find((x) => x.id === this.assessment.borgCategory.id).borgContent,
-    );
-    this.isShowDistance = false;
-    this.isShowBorgDialog = this.isShowBorgDialog ? false : true;
-  }
-  /**
-   * borg值=>文字
-   */
-  public borgRepresent(input: number) {
-    let result: string = '';
-    // 本次所用的borg表
-    if (input) {
-      const currentBorg = JSON.parse(
-        this.borg.find((x: any) => x.id === this.assessment.borgCategory.id)
-          .borgContent,
-      );
-      result = currentBorg.find((x: any) => x.value === input).description;
-    } else {
-      result = '未选择';
+    activated() {
+      this.id = this.$route.params.id;
+      this.$store.state.isBack = false;
+    }
+    deactivated() {}
+    @Watch("id")
+    getdata() {
+      this.getAssessmentInfo();
     }
 
-    return result;
-  }
-  /**
-   * 跳转
-   */
-  public goRoute(input: string) {
-    switch (input) {
-      case 'plan':
-        ls.set('assessmentpreventplan', this.assessment.preventiveScheme);
-        this.$router.push({
-          path: '/preventplan/' + this.id,
+    /**
+     * 回到上页
+     */
+    public back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    /**
+     * 获取borg表内容
+     */
+    public getBorg() {
+      const borg = ls.get("borg");
+      // localstorage中有borg表
+      if (borg) {
+        this.borg = borg;
+      } else {
+        this.$server.getBorg().then(res => {
+          this.borg = res.result;
+          ls.set("borg", this.borg);
         });
-        break;
+      }
+    }
+    public getAssessmentInfo() {
+      this.$server.getAssessmentInfo(this.id).then(res => {
+        this.assessment = res.result;
+        this.hrInterval = JSON.parse(this.assessment.hrInterval);
+        this.loadding = true;
+      });
+    }
+    /**
+     * 关闭弹层
+     */
+    public cancel() {
+      this.isShowDistance = false;
+      this.isShowBorgDialog = false;
+    }
+    /**
+     * 年龄
+     */
+    public setAge(age: number) {
+      return age ? age + "岁" : "--";
+    }
+    /**
+     * 身高
+     */
+    public setHeight(height: number) {
+      return height ? height + "cm" : "--";
+    }
+    /**
+     * 体重
+     */
+    public setWeight(weight: number) {
+      return weight ? weight + "kg" : "--";
+    }
+    /**
+     * bmi+对应体重状态
+     */
+    public countBmiDes(bmi: number) {
+      return bmi + common.BMIExplain(bmi);
+    }
+    /**
+     * 年月日时间
+     */
+    public countTime(startTime: number) {
+      return moment(startTime).format("YYYY.MM.DD");
+    }
+    /**
+     * 时分秒
+     */
+    public getTimetDduration(startTime: number, endTime: number) {
+      return (
+        moment(startTime).format("HH.mm.ss") +
+        "-" +
+        moment(endTime).format("HH.mm.ss")
+      );
+    }
+    /**
+     * 步行等级和颜色
+     */
+    public distanceLevel(input: number) {
+      const result = {
+        type: "",
+        color: ""
+      };
+      if (input < 300) {
+        result.type = "I级";
+        result.color = "#d20505";
+      } else if (input >= 300 && input < 375) {
+        result.type = "II级";
+        result.color = "#f87931";
+      } else if (input >= 375 && input < 450) {
+        result.type = "III级";
+        result.color = "#f5a623";
+      } else {
+        result.type = "IV级";
+        result.color = "#f8e71c";
+      }
+      this.distanceLevelcolor = result.color;
+      return result;
+    }
+    /**
+     * 距离borg弹窗
+     */
+    public showBorgDistance() {
+      this.isShowDistance = this.isShowDistance ? false : true;
+      this.isShowBorgDialog = false;
+    }
+    /**
+     * 疲劳感borg弹窗
+     */
+    public showBorgInfoDialog() {
+      this.borgContentArray = JSON.parse(
+        this.borg.find(x => x.id === this.assessment.borgCategory.id).borgContent
+      );
+      this.isShowDistance = false;
+      this.isShowBorgDialog = this.isShowBorgDialog ? false : true;
+    }
+    /**
+     * borg值=>文字
+     */
+    public borgRepresent(input: number) {
+      let result: string = "";
+      // 本次所用的borg表
+      if (input) {
+        const currentBorg = JSON.parse(
+          this.borg.find((x: any) => x.id === this.assessment.borgCategory.id)
+            .borgContent
+        );
+        result = currentBorg.find((x: any) => x.value === input).description;
+      } else {
+        result = "未选择";
+      }
+
+      return result;
+    }
+    /**
+     * 跳转
+     */
+    public goRoute(input: string) {
+      switch (input) {
+        case "plan":
+          ls.set("assessmentpreventplan", this.assessment.preventiveScheme);
+          this.$router.push({
+            path: "/preventplan/" + this.id
+          });
+          break;
+      }
     }
   }
-}
 </script>
 <style lang='scss' scoped>
   .assessment_info {
     position: relative;
-    padding-top: $header-height;
+    // padding-top: $header-height;
+    height: 100%;
     background-color: #f7f7f7;
     > .header {
-      position: fixed;
+      position: absolute;
       width: 100%;
       transform: all 0.5s;
       opacity: 1;
       top: 0%;
       left: 0%;
     }
-    main {
-      width: 100%;
-      background-color: #f7f7f7;
+    > main {
       padding: 1rem;
+      padding-top: 4.75rem;
+      height: 100%;
+      overflow: hidden;
+      overflow-y: scroll;
       box-sizing: border-box;
       > .main_h {
         height: 6.665rem;
@@ -712,7 +735,7 @@ export default class AssessmentInfo extends Vue {
               }
               > .before,
               > .after {
-                padding: 1rem 0rem;
+                margin: 1rem 0rem;
                 font-size: 1.25rem;
                 font-weight: normal;
 

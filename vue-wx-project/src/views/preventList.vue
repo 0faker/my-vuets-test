@@ -1,106 +1,107 @@
 <template>
-  <cube-scroll
+  <!-- <cube-scroll
     ref="scroll1"
     class="scroll-list-outer-wrap"
-  >
-    <div class="prevent">
-      <div class="header">
-        <div
-          class="back"
-          @click="back"
+  > -->
+  <div class="prevent">
+    <div class="header">
+      <div
+        class="back"
+        @click="back"
+      >
+        <img
+          src="../assets/back.png"
+          alt=""
+          srcset=""
         >
-          <img
-            src="../assets/back.png"
-            alt=""
-            srcset=""
-          >
-        </div>
-        <div class="title">
-          预防记录
-        </div>
-        <div
-          v-if="isGetAll"
-          class="header-r"
-          @click="clickToday"
-        >
-          回到当天
-        </div>
-        <div
-          v-else
-          class="header-r"
-          @click="getAll"
-        >
-          全部
-        </div>
       </div>
-      <!--  
+      <div class="title">
+        预防记录
+      </div>
+      <div
+        v-if="isGetAll"
+        class="header-r"
+        @click="clickToday"
+      >
+        回到当天
+      </div>
+      <div
+        v-else
+        class="header-r"
+        @click="getAll"
+      >
+        全部
+      </div>
+    </div>
+    <!--  
   :agoDayHide='1514937600'//某个日期以前的不允许点击  时间戳10位
   :futureDayHide='1525104000' //某个日期以后的不允许点击  时间戳10位
   -->
-      <calendar
-        ref="Calendar"
-        @choseDay="clickDay"
-        @changeMonth="changeDate"
-        :futureDayHide='nowDate'
-        :topText="['周日','周一', '周二', '周三', '周四', '周五', '周六']"
-        :markDateMore="markDate"
-      ></calendar>
-      <!-- <div>
+    <calendar
+      ref="Calendar"
+      @choseDay="clickDay"
+      @changeMonth="changeDate"
+      :futureDayHide='nowDate'
+      :topText="['周日','周一', '周二', '周三', '周四', '周五', '周六']"
+      :markDateMore="markDate"
+    ></calendar>
+    <!-- <div>
       收起日历
     </div> -->
-      <div
-        class="scroll-list-wrap"
-        v-if="ishavedate"
+    <div
+      class="scroll-list-wrap"
+      v-if="ishavedate"
+    >
+      <cube-scroll
+        ref="scroll"
+        :data="PreventList"
+        :options="options"
+        @pulling-down="onPullingDown"
+        @pulling-up="onPullingUp"
       >
-        <cube-scroll
-          ref="scroll"
-          :data="PreventList"
-          :options="options"
-          @pulling-down="onPullingDown"
-          @pulling-up="onPullingUp"
-        >
-          <ul>
-            <li
-              v-for="item in PreventList"
-              :key="item.id"
-            >
-              <div class="datetime">{{getDate(item.date,'d')}}</div>
-              <div class="alltime">总训练时长：{{getTotalTime(item.totaltime)}}</div>
-              <ul>
-                <li
-                  class="list"
-                  v-for="item1 in item.objectList"
-                  :key="item1.id"
-                  @click="getdetail(item1.id)"
-                >
-                  <div>
-                    <span class="list-l">{{getDate(item1.startTime,'hms')}}-{{getDate(item1.endTime,"hms")}}</span>
-                    <span class="list-r"> {{changeSEC(item1.totalExerciseTime)}}</span>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </cube-scroll>
-      </div>
-      <div
-        class="dataTips"
-        v-else
-      >
-        {{tips}}
-      </div>
+        <ul>
+          <li
+            v-for="item in PreventList"
+            :key="item.id"
+          >
+            <div class="datetime">{{DateChangeType(item.day)}}</div>
+            <div class="alltime">总训练时长：{{getTotalTime(item.totaltime)}}</div>
+            <ul>
+              <li
+                class="list"
+                v-for="item1 in item.objectList"
+                :key="item1.id"
+                @click="getdetail(item1.id)"
+              >
+                <div>
+                  <span class="list-l">{{getDate(item1.startTime,'hms')}}-{{getDate(item1.endTime,"hms")}}</span>
+                  <span class="list-r"> {{changeSEC(item1.totalExerciseTime)}}</span>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </cube-scroll>
     </div>
-  </cube-scroll>
+    <div
+      class="dataTips"
+      v-else
+    >
+      {{tips}}
+    </div>
+  </div>
+  <!-- </cube-scroll> -->
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import Calendar from "../../node_modules/vue-calendar-component/src/calendar.vue";
   import common from "../common/common";
   import moment from "moment";
   @Component({
     components: {
       Calendar
-    }
+    },
+    name: "lists"
   })
   export default class PreventList extends Vue {
     public nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
@@ -119,7 +120,7 @@
     public mounted() {
       this.id = this.$route.params.id;
       this.initialize();
-      this.getPrenventList();
+      // this.getPrenventList();
     }
     /**
      * 回到上页
@@ -127,6 +128,21 @@
     public back() {
       this.$store.state.isBack = true;
       this.$router.back();
+    }
+    activated() {
+      this.id = this.$route.params.id;
+      this.$store.state.isBack = false;
+    }
+    deactivated() {}
+    @Watch("id")
+    getdata() {
+      this.currentPageNo = 1;
+      // 清空数据
+      this.currentPageNo = 1;
+      // 清空数据
+      this.PreventList = [];
+      this.PreventListResult = [];
+      this.getPrenventList();
     }
     // 初始化
     public initialize() {
@@ -156,7 +172,7 @@
       let date = moment().format("YYYY/MM/DD");
       console.log(date); // 跳到了本月
       this.markDate = [];
-      (this.$refs.Calendar as Calendar).ChoseMonth(date);
+      (this.$refs.Calendar as any).ChoseMonth(date);
     }
     getAll() {
       this.markDate = [
@@ -223,6 +239,9 @@
      */
     public getDate(input: number, type: string) {
       return common.getDate(input, type);
+    }
+    DateChangeType(input: string) {
+      return input.split(".").join("-");
     }
     /**
      * 计算总时长

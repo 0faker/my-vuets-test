@@ -38,6 +38,7 @@
         <div
           class="clear"
           @click="clearInput"
+          v-if='showClear'
         >
           <img
             src="../assets/delete.png"
@@ -91,6 +92,7 @@
     public codeWarn: string = "";
     public isSure: boolean = true;
     public codeInterval: any; // 验证码计数器
+    showClear: boolean = false;
     public created() {
       this.oldphone = this.$route.query.userphone + "";
     }
@@ -109,8 +111,10 @@
       console.log(input);
       this.showPhone = Common.change(input);
       this.newphone = this.showPhone.replace(/\s+/g, "");
+      this.showClear = this.newphone ? true : false;
       if (Common.regPhone(+this.newphone)) {
         this.isdisabled = false;
+        this.inputCode();
       } else {
         this.isdisabled = true;
       }
@@ -121,6 +125,7 @@
     public clearInput() {
       this.showPhone = "";
       this.isdisabled = true;
+      this.showClear = false;
     }
     /**
      * 取消返回
@@ -143,6 +148,7 @@
               // 验证码发送成功
               this.isSendCode = true;
               this.codeInterval = setInterval(() => {
+                index--;
                 this.sendCodeMsg = index + "s";
                 if (index === 0) {
                   // 验证码发送60s
@@ -162,9 +168,11 @@
      * 输入验证码
      */
     public inputCode() {
-      this.code = this.code.replace(/\s+/g, "");
-      console.log(this.code);
-      this.isSure = this.code.length === 4 ? false : true;
+      if (Common.regPhone(+this.newphone)) {
+        this.code = this.code.replace(/\s+/g, "");
+        console.log(this.code);
+        this.isSure = this.code.length === 4 ? false : true;
+      }
     }
     /**
      * 确定更改

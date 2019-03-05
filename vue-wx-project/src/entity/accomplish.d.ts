@@ -49,5 +49,6 @@ declare namespace Accomplished {
  export interface AccomplishedInstance {
   date: number; // 训练日期时间戳
   Accomplished: AccomplishedInfo[]; // 记录列表
+  totalTime: number;
  }
 }

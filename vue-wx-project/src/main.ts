@@ -3,9 +3,9 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 import './registerServiceWorker';
-import './base.scss';
-import './calendar.scss';
-import './indexList.scss';
+import './css/base.scss';
+import './css/calendar.scss';
+import './css/indexList.scss';
 import './cube-ui';
 import 'weui';
 import {
@@ -20,11 +20,8 @@ Vue.use(DatePicker, Picker, IndexList);
 import Server from './fetch/fetch';
 import Common from './common/common';
 import VueRouter from 'vue-router';
-// import VueQuickLoadmore from 'vue-quick-loadmore';
-// declare var VueQuickLoadmore: any;
-
-// Vue.use(VueQuickLoadmore);
-
+// import ToastComponent from "./Toast";
+// Vue.use(ToastComponent)
 Vue.config.productionTip = false;
 Vue.prototype.$server = Server;
 Vue.prototype.$common = Common;

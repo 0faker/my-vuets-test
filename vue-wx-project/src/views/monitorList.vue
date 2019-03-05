@@ -61,7 +61,7 @@
             v-for="item in MonitorList"
             :key="item.id"
           >
-            <div class="datetime">{{getDate(item.date,'d')}}</div>
+            <div class="datetime">{{DateChangeType(item.day)}}</div>
             <ul>
               <li
                 class="list"
@@ -98,20 +98,21 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import Calendar from "../../node_modules/vue-calendar-component/src/calendar.vue";
   import common from "../common/common";
   import moment from "moment";
   @Component({
     components: {
       Calendar
-    }
+    },
+    name: "lists"
   })
   export default class MonitorList extends Vue {
     public nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
     public id: string = "";
     public currentPageNo: number = 1;
-    public pageSize: number = 50;
+    public pageSize: number = 10;
     public prescriptionDate: string | null = null;
     public MonitorList: Accomplished.AccomplishedInstance[] = []; // 记录列表
     public MonitorListResult: Accomplished.AccomplishedInfo[] = []; // 记录列表请求结果
@@ -124,6 +125,19 @@
     public mounted() {
       this.id = this.$route.params.id;
       this.initialize();
+      // this.getMonitortList();
+    }
+    activated() {
+      this.id = this.$route.params.id;
+      this.$store.state.isBack = false;
+    }
+    deactivated() {}
+    @Watch("id")
+    getdata() {
+      this.currentPageNo = 1;
+      // 清空数据
+      this.MonitorList = [];
+      this.MonitorListResult = [];
       this.getMonitortList();
     }
     /**
@@ -156,10 +170,13 @@
     public changeDate(data: any) {
       console.log(data); // 左右点击切换月份
     }
+    DateChangeType(input: string) {
+      return input.split(".").join("-");
+    }
     public clickToday(data: any) {
       let date = moment().format("YYYY/MM/DD");
       this.markDate = [];
-      (this.$refs.Calendar as Calendar).ChoseMonth(date);
+      (this.$refs.Calendar as any).ChoseMonth(date);
     }
     getAll() {
       this.markDate = [
@@ -227,6 +244,9 @@
      */
     public getDate(input: number, type: string) {
       return common.getDate(input, type);
+    }
+    changeDatetype(input: string) {
+      return input.split(".").join("-");
     }
     /**
      * 计算总时长

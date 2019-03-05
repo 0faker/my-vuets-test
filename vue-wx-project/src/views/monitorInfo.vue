@@ -94,60 +94,72 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import METsChart from '@/components/METsChart.vue';
-import common from '../common/common';
-@Component({
-  components: {
-    METsChart,
-  },
-})
-export default class MonitorInfo extends Vue {
-  public id: string = '';
-  public IndependentMonitoring!: Monitor.MonitorInfo;
-  // ------ui-------
-  public loadding: boolean = false;
-  /**
-   * 回到上页
-   */
-  public back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import METsChart from "@/components/METsChart.vue";
+  import common from "../common/common";
+  @Component({
+    components: {
+      METsChart
+    },
+    name: "infos"
+  })
+  export default class MonitorInfo extends Vue {
+    public id: string = "";
+    public IndependentMonitoring!: Monitor.MonitorInfo;
+    // ------ui-------
+    public loadding: boolean = false;
+    /**
+     * 回到上页
+     */
+    public back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+
+    public mounted() {
+      this.id = this.$route.params.id;
+      // this.getMonitorInfo();
+    }
+    activated() {
+      this.id = this.$route.params.id;
+      this.$store.state.isBack = false;
+    }
+    deactivated() {}
+    @Watch("id")
+    getdata() {
+      this.getMonitorInfo();
+    }
+    public getMonitorInfo() {
+      this.$server.getMonitorInfo(this.id).then(res => {
+        this.IndependentMonitoring = res.result;
+        this.loadding = true;
+      });
+    }
+    /**
+     * 查看三分钟心电记录
+     */
+    public check() {
+      this.$router.push({
+        path: "/threeminutesrecords/" + this.id
+      });
+    }
+    /**
+     * 清除弹层
+     */
+    public cancel() {}
+    public getMin(input: number) {
+      return common.changeSEC(input);
+    }
   }
-  public mounted() {
-    this.id = this.$route.params.id;
-    this.getMonitorInfo();
-  }
-  public getMonitorInfo() {
-    this.$server.getMonitorInfo(this.id).then((res) => {
-      this.IndependentMonitoring = res.result;
-      this.loadding = true;
-    });
-  }
-  /**
-   * 查看三分钟心电记录
-   */
-  public check() {
-    this.$router.push({
-      path: '/threeminutesrecords/' + this.id,
-    });
-  }
-  /**
-   * 清除弹层
-   */
-  public cancel() {}
-  public getMin(input: number) {
-    return common.changeSEC(input);
-  }
-}
 </script>
 <style lang='scss' scoped>
   .monitor_info {
     position: relative;
-    padding-top: $header-height;
+    // padding-top: $header-height;
+    height: 100%;
     background-color: #f7f7f7;
     > .header {
-      position: fixed;
+      position: absolute;
       width: 100%;
       transform: all 0.5s;
       opacity: 1;
@@ -156,6 +168,11 @@ export default class MonitorInfo extends Vue {
     }
     > main {
       padding: 1rem;
+      padding-top: 4.75rem;
+      height: 100%;
+      overflow: hidden;
+      overflow-y: scroll;
+      box-sizing: border-box;
       > .main_h {
         height: 6.665rem;
         // background: #000;

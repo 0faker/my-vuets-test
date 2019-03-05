@@ -18,10 +18,14 @@
         maxlength=13
         @input='verifyPhone'
       >
-      <div class='clear'>
+      <div
+        class="clear"
+        v-if='showClear'
+        @click="clear"
+      >
         <img
-          src=''
-          alt=''
+          src="../assets/delete.png"
+          alt=""
         >
       </div>
     </div>
@@ -45,6 +49,7 @@
       <div
         class='wrongCodeMsg'
         v-if='showWrongCodeMsg'
+        v-cloak
       >
         {{wrongCodeMsg}}
       </div>
@@ -66,8 +71,11 @@
   import Common from "../common/common";
   import * as ls from "local-storage";
   import Axios from "axios";
+  import wxApi from "../common/wxConfig";
+  import { SignatureObj, WeChatSignature } from "../entity/SignatureObj";
   @Component
   export default class LoginComponent extends Vue {
+    public SignatureObj?: SignatureObj; // 微信签名
     private wxCode?: string; // 微信code
     private tel: string = ""; // 号码
     private showTel: string = ""; // 输入框中显示的号码
@@ -80,10 +88,13 @@
     // ----ui-----
     private isCanGetCode: boolean = true; // 获取验证码可点击
     private codeMsg: string = "获取验证码"; // 验证码内文字
+    public isSendCode: boolean = false; // 是否可再发送验证码
     private activeCodeColor?: string; // 获取验证码按钮颜色
     private isCanLogin: boolean = true; // 登录按钮可用状态
     private activeLoginColor?: string; // 登录按钮颜色
     private loadding: boolean = false;
+    showClear: boolean = false;
+    public url: string = location.href;
 
     unionId!: number;
     openId!: number;
@@ -98,6 +109,16 @@
 
       this.wxCode = this.$route.query.code.toString();
       console.log(this.wxCode);
+      /**
+       * ios微信签名
+       */
+      if (Common.getPhoneType() == "ios") {
+        console.log(1234);
+        this.$server.getWxConfig(this.url).then((res: any) => {
+          this.SignatureObj = res.weChatSignature;
+          wxApi.wxConfig(this.SignatureObj);
+        });
+      }
       this.getAuth();
     }
     /**
@@ -145,20 +166,26 @@
       const input: string = this.showTel;
       this.showTel = Common.change(input);
       this.tel = this.showTel.replace(/\s+/g, "");
+      this.showClear = this.tel ? true : false;
       // 正则匹配
       if (Common.regPhone(+this.tel)) {
         // 匹配
         if (!this.isSendedCode) {
           this.isCanGetCode = false; // 不可点击
           this.activeCodeColor = "#4caf50";
-          this.activeLoginColor = this.code.length == 4 ? "#4caf50" : "#6d726d";
         }
+        this.activeLoginColor = this.code.length == 4 ? "#4caf50" : "#6d726d";
+        this.isCanLogin = this.code.length == 4 ? true : false;
       } else {
         this.isCanGetCode = true;
         this.activeCodeColor = "#6d726d";
         this.activeLoginColor = "#6d726d";
       }
       this.verifyCode();
+    }
+    clear() {
+      this.showTel = "";
+      this.showClear = false;
     }
     /**
      * 发送验证码
@@ -258,6 +285,19 @@
         &:focus {
           outline: none;
           border: 0;
+        }
+      }
+      > .clear {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 1.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        > img {
+          width: 100%;
+          height: 100%;
         }
       }
       > .get-code {

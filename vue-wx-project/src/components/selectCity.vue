@@ -30,12 +30,18 @@
         <div
           class="positioning_city"
           @click="searchCity()"
-        >南京</div>
-        <div class="last_city">南京</div>
+        >{{positioningCity}}</div>
+        <div class="last_city">{{lastSelectedCityName}}</div>
       </div>
       <div v-else>
-        <div class="national">全国</div>
-        <div class="positioning_fail">定位失败,点击重试</div>
+        <div
+          class="national"
+          @click="getAll"
+        >全国</div>
+        <div
+          class="positioning_fail"
+          @click="rePosition"
+        >定位失败,点击重试</div>
       </div>
     </div>
 
@@ -62,14 +68,17 @@
   import { Component, Prop, Vue } from "vue-property-decorator";
   import ls from "local-storage";
   import common from "../common/common";
+  declare var BMap: any;
   @Component
   export default class SelectCity extends Vue {
-    public searchCityName: string | null = null;
+    public positioningCity: string | null = null; // 定位的城市
+    public lastSelectedCityName: string | null = null; //最后选择的城市
     public isCancel: boolean = false;
     public positioning: boolean = false;
     public cityLists: any[] = [];
     public mounted() {
       this.formattingCityLists();
+      this.positioningCity = sessionStorage.GetItem("currentCityName") || null;
     }
     /**
      * 初始化城市列表
@@ -85,10 +94,10 @@
       }
       const cityList = ls.get("cityList");
       cityList.forEach((element: any) => {
-        // element.initials = common.getInitials(element.name);
+        element.initials = common.getInitials(element.name);
         // console.log(new Date().getTime());
         // // 全拼
-        // element.pinyin = common.getPinyin(element.name);
+        element.pinyin = common.getPinyin(element.name);
         // console.log(new Date().getTime());
         for (let k = 0; k < arr.length; k++) {
           // 所有首字母
@@ -126,6 +135,37 @@
     public chooseCity(e: any) {
       console.log(e);
       this.$emit("choose-city", e.id, e.name);
+    }
+    /**
+     * 全国
+     */
+    getAll() {
+      this.$emit("choose-city", null, "全国");
+    }
+    /**
+     * 重新定位
+     */
+    rePosition() {
+      var geolocation = new BMap.Geolocation();
+
+      geolocation.getCurrentPosition(
+        (r: any) => {
+          console.log(r);
+          if (r) {
+            console.log(r.address.city);
+            this.positioningCity = r.address.city;
+            if (this.positioningCity) {
+              sessionStorage.setItem("currentCityName", this.positioningCity);
+              //通过城市名获取城市id
+            }
+          } else {
+            // 定位失败 r=null
+            // this.currentCityName = "全国";
+            // this.getDoctorService();
+          }
+        },
+        { enableHighAccuracy: true }
+      );
     }
   }
 </script>

@@ -3,13 +3,6 @@
  */
 import axios from 'axios';
 import ls from 'local-storage'
-// import { serverUrl } from './configByEnv.js'
-const Authorization = 'xxbearer:eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjE3MzI3ODgwNjc1IiwiZXhwIjoxNTUzMDQ3ODM1fQ.76Q4r80bXFL5OKBd75QgIrqZAl7g0Om7DSNjlK8Lsgy-AfYxhB-F2aSwNuuvSrtPLAa40a5K--UVm9wnUsOHDw';
-// const Authorization = ls.get('Authorization');
-axios.defaults.headers = {
-  Authorization,
-};
-// axios.defaults.baseURL = serverUrl;
 axios.defaults.baseURL = '/ppay/testserver';
 
 axios.interceptors.request.use((config) => {
@@ -408,6 +401,18 @@ class Server implements Server.IServer {
         phone, code,
       },
       method: 'post',
+    });
+  }
+  /**
+   * 获取城市id
+   * @param cityName 城市姓名
+   */
+  public GetCityId(cityName: string): Promise<any> {
+    return axios({
+      url: '/cp/ep/patient/city',
+      params: {
+        cityName
+      }
     });
   }
   /**

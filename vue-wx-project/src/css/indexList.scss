@@ -1,5 +1,5 @@
 .cube-index-list-content {
- background-color: #222;
+ // background-color: #222;
  color: #909090;
 
  >ul {
@@ -38,10 +38,14 @@
 }
 
 .cube-index-list-anchor {
- background-color: #333;
+ // background-color: #333;
  height: 30px;
  line-height: 30px;
  padding: 0 0 0 20px;
+}
+
+.cube-index-list-fixed {
+ display: none;
 }
 
 .cube-index-list-nav {

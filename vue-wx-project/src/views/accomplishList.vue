@@ -63,7 +63,7 @@
             :key="item.id"
           >
             <div class="datetime">{{getDate(item.date,'d')}}</div>
-            <div class="alltime">总训练时长：{{getTotalTime(item.totaltime)}}</div>
+            <div class="alltime">总训练时长：{{getTotalTime(item.totalTime)}}</div>
             <ul>
               <li
                 class="list"
@@ -90,14 +90,15 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
-  import Calendar from "../../node_modules/vue-calendar-component/lib/calendar.vue";
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+  import Calendar from "../../node_modules/vue-calendar-component/src/calendar.vue";
   import common from "../common/common";
   import moment from "moment";
   @Component({
     components: {
       Calendar
-    }
+    },
+    name: "lists"
   })
   export default class Accomplish extends Vue {
     public nowDate: string = Math.ceil(new Date().getTime() / 1000) + "";
@@ -121,13 +122,29 @@
       // };
       this.id = this.$route.params.id;
       this.initialize();
+      console.log(this.id);
+      // this.getAllAccomplish();
+    }
+    activated() {
+      this.id = this.$route.params.id;
+      this.$store.state.isBack = false;
+    }
+    deactivated() {}
+    @Watch("id")
+    getdata() {
+      this.currentPageNo = 1;
+      // 清空数据
+      this.AccomplishList = [];
+      this.AccomplishListResult = [];
       this.getAllAccomplish();
     }
+
     /**
      * 回到上页
      */
     public back() {
       this.$store.state.isBack = true;
+      console.log(this.$store.state.isBack);
       this.$router.back();
     }
     // 初始化
@@ -141,8 +158,6 @@
       };
     }
     public clickDay(data: string) {
-      // console.log(this.nowDate);
-      // console.log(data); // 选中某天
       this.markDate = [];
       this.isGetAll = false;
       this.prescriptionDate = data.split("/").join("-");
@@ -157,9 +172,8 @@
     }
     public clickToday(data: any) {
       let date = moment().format("YYYY/MM/DD");
-      console.log(date); // 跳到了本月
       this.markDate = [];
-      (this.$refs.Calendar as Calendar).ChoseMonth(date);
+      (this.$refs.Calendar as any).ChoseMonth(date);
     }
     /**
      * 获取康复记录列表
@@ -177,13 +191,12 @@
             res.result
           );
           this.AccomplishList = this.changeMsg(this.AccomplishListResult);
-          this.maxPage = res.totalPage;
+          this.maxPage = res.totalPageCount;
           if (this.AccomplishList.length == 0) {
             this.ishavedate = false;
             this.tips = this.isGetAll
               ? "暂无您的亲属的康复记录！"
               : "您的亲属今天没有康复记录！";
-            console.log(this.tips);
           } else {
             this.ishavedate = true;
           }
@@ -212,11 +225,11 @@
         // 赋值第一条数据
         arr[arrindex] = {
           date: msg[0].prescriptionDate,
-          Accomplished: []
+          Accomplished: [],
+          totalTime: 0
         };
         // 循环遍历msg
         for (let i = 0; i < msg.length; i++) {
-          console.log(msg.length);
           if (msg[i].prescriptionDate === arr[arrindex].date) {
             // 训练日期相同
             arr[arrindex].Accomplished.push(msg[i]);
@@ -227,13 +240,18 @@
 
             arr[arrindex] = {
               date: msg[i].prescriptionDate,
-              Accomplished: []
+              Accomplished: [],
+              totalTime: 0
             };
             arr[arrindex].Accomplished.push(msg[i]);
           }
         }
       }
-      console.log(arr);
+      arr.forEach((e: Accomplished.AccomplishedInstance) => {
+        e.Accomplished.forEach(ele => {
+          e.totalTime += ele.totalExerciseTime;
+        });
+      });
       return arr;
     }
     /**
@@ -247,6 +265,7 @@
      * 上拉
      */
     public onPullingUp() {
+      console.log(this.maxPage);
       if (this.maxPage > this.currentPageNo) {
         this.currentPageNo++;
         this.getAllAccomplish();

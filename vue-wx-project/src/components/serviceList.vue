@@ -36,8 +36,9 @@
           >
             <div class="headimg">
               <img
-                src="../assets/report_man_blue.png"
+                :src="item.headImageUrl"
                 alt=""
+                onerror="this.src='./img/ic_patient_avator.png'"
               >
             </div>
             <div class="doctor_infos">
@@ -169,11 +170,11 @@
     public addServiceImg() {
       this.categoryList.forEach((element: any) => {
         if (element.id == 7) {
-          element.activeImg = "/img/ic_rx_pay_s.png";
-          element.disactiveImg = "/img/ic_rx_pay_n.png";
+          element.activeImg = "./img/ic_rx_pay_s.png";
+          element.disactiveImg = "./img/ic_rx_pay_n.png";
         } else if (element.id == 8) {
-          element.activeImg = "/img/ic_hr_anasysis_pay_s.png";
-          element.disactiveImg = "/img/ic_hr_anasysis_pay_n.png";
+          element.activeImg = "./img/ic_hr_anasysis_pay_s.png";
+          element.disactiveImg = "./img/ic_hr_anasysis_pay_n.png";
         }
       });
     }

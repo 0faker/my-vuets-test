@@ -8,10 +8,13 @@ export default new Vuex.Store({
     userName: '',
     // cyclePrescriptions: [],
     isBack: false,
-
+    type: 'normal',
+    msg: ''
   },
   mutations: {
-
+    // showToast(state){
+    //   state.type
+    // }
   },
   actions: {
 

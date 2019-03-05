@@ -31,38 +31,56 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import ServiceList from '../../components/serviceList.vue';
-@Component({
-  components: {
-    ServiceList,
-  },
-})
-export default class MatchDoctor extends Vue {
-  public doctorName: string = '';
-  public doctorServiceLists: any = [];
-  public created() {
-    this.doctorName = this.$route.query.doctor.toString();
-    this.getDoctorService();
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  import ServiceList from "../../components/serviceList.vue";
+  import common from "../../common/common";
+  import { SignatureObj } from "../../entity/SignatureObj";
+  import wxApi from "../../common/wxConfig";
+  @Component({
+    components: {
+      ServiceList
+    }
+  })
+  export default class MatchDoctor extends Vue {
+    public doctorName: string = "";
+    public doctorServiceLists: any = [];
+    // 微信签名
+    public url: string = location.href;
+    public SignatureObj?: SignatureObj; // 微信签名
+    public created() {
+      this.doctorName = this.$route.query.doctor.toString();
+      this.getDoctorService();
+      this.wxConfig();
+    }
+    /**
+     * 回到上页
+     */
+    public back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    /**
+     * 微信签名(安卓)
+     */
+    wxConfig() {
+      if (common.getPhoneType() !== "ios") {
+        this.$server.getWxConfig(this.url).then((res: any) => {
+          this.SignatureObj = res.weChatSignature;
+          wxApi.wxConfig(this.SignatureObj);
+        });
+      }
+    }
+    /**
+     * 获取医生服务
+     */
+    public getDoctorService() {
+      this.$server
+        .GetCityDoctors(10000, 1, undefined, this.doctorName)
+        .then(data => {
+          this.doctorServiceLists = data.result;
+        });
+    }
   }
-  /**
-   * 回到上页
-   */
-  public back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-  /**
-   * 获取医生服务
-   */
-  public getDoctorService() {
-    this.$server
-      .GetCityDoctors(10000, 1, undefined, this.doctorName)
-      .then((data) => {
-        this.doctorServiceLists = data.result;
-      });
-  }
-}
 </script>
 <style lang='scss' scoped>
   .match_doctor {

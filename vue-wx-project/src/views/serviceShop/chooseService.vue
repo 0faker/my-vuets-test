@@ -80,18 +80,24 @@
   </div>
 </template>
 <script lang='ts'>
-  import { Component, Prop, Vue } from "vue-property-decorator";
+  import { Component, Prop, Vue, Watch } from "vue-property-decorator";
   import ls from "local-storage";
+
+  import common from "../../common/common";
+  import { SignatureObj } from "../../entity/SignatureObj";
+  import wxApi from "../../common/wxConfig";
+  // component
   import ServiceList from "../../components/serviceList.vue";
   import SelectCity from "../../components/selectCity.vue";
   import SearchCity from "../../components/searchCity.vue";
-  import common from "../../common/common";
+  declare var BMap: any;
   @Component({
     components: {
       ServiceList,
       SelectCity,
       SearchCity
-    }
+    },
+    name: "user"
   })
   // 选择服务商品
   export default class ChooseService extends Vue {
@@ -99,31 +105,79 @@
     public doctorServiceLists: any[] = [];
     public showSearchCity: boolean = false;
     public showSelectCity: boolean = false;
-    public currentCityName: string = ""; // 当前选择的城市
-    public currentCityId?: number; // 当前选择的城市
-    public positioningCity: string = ""; // 定位的城市
-    public pageSize: number = 20;
+    public currentCityName: string = ""; // 当前选择的城市名
+    public currentCityId?: number; // 当前选择的城市id
+    public positioningCity: string = ""; // 定位的城市名
+    public pageSize: number = 10;
     public currentPage: number = 1;
     maxPage: number = 1; //医生列表最大页数
     isPullingUp: boolean = true; //是否下拉刷新
+    // 微信签名
+    public url: string = location.href;
+    public SignatureObj?: SignatureObj; // 微信签名
     public cityLists: Array<{
       id: number;
       name: string;
     }> = [];
     public created() {
+      this.wxConfig();
       this.patientId = ls.get("payPatient");
 
       // 赋值当前城市为sessionStorage中城市
-      this.currentCityName = sessionStorage.getItem("currentCityName") || "";
-      if (this.currentCityName) {
+      this.currentCityName =
+        sessionStorage.getItem("currentCityName") || "定位中";
+      if (this.currentCityName !== "定位中") {
         // 不定位
       } else {
         // 定位
-        this.positioningCity = "南京";
-        this.currentCityName = this.positioningCity;
+        var geolocation = new BMap.Geolocation();
+
+        geolocation.getCurrentPosition(
+          (r: any) => {
+            console.log(r);
+            if (r) {
+              console.log(r.address.city);
+              this.currentCityName = r.address.city;
+              sessionStorage.setItem("currentCityName", this.currentCityName);
+              //通过城市名获取城市id
+              this.$server.GetCityId(this.currentCityName).then(res => {
+                this.currentCityId = res.result;
+                this.getDoctorService();
+              });
+            } else {
+              // 定位失败 r=null
+              this.currentCityName = "全国";
+              this.getDoctorService();
+            }
+          },
+          { enableHighAccuracy: true }
+        );
+        // this.positioningCity = "南京";
+        // this.currentCityName = this.positioningCity;
       }
       this.getCitys();
-      this.getDoctorService();
+    }
+    activated() {
+      this.patientId = ls.get("payPatient");
+    }
+    @Watch("patientId")
+    changePatient(val: string, oldval: string) {
+      // paitientid变化
+      if (oldval) {
+        this.wxConfig();
+        this.getDoctorService();
+      }
+    }
+    /**
+     * 微信签名(安卓)
+     */
+    wxConfig() {
+      if (common.getPhoneType() !== "ios") {
+        this.$server.getWxConfig(this.url).then((res: any) => {
+          this.SignatureObj = res.weChatSignature;
+          wxApi.wxConfig(this.SignatureObj);
+        });
+      }
     }
     /**
      * 获取全部医生服务

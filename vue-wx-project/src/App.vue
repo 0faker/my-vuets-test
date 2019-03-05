@@ -1,21 +1,24 @@
 <template>
   <div id="app">
     <transition :name="transitionName">
-      <router-view />
+      <keep-alive :include='["user","lists","infos","user"]'>
+        <router-view>
+          <!-- 这里是会被缓存的视图组件，比如 Home！ -->
+        </router-view>
+      </keep-alive>
+
     </transition>
   </div>
 
 </template>
 <script lang="ts">
   import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-  import wxApi from "./common/wxConfig";
-  import { SignatureObj, WeChatSignature } from "./entity/SignatureObj";
-  import Common from "./common/common";
   @Component
   export default class App extends Vue {
     public transitionName: string = "";
-    public SignatureObj?: SignatureObj; // 微信签名
-    public url: string = location.href;
+    // type!: string;
+    // msg!: string;
+    // isShowToast: boolean = false;
     /**
      * 监听路由
      */
@@ -32,17 +35,6 @@
       // } else {
       next();
       // }
-    }
-    mounted() {
-      /**
-       * ios微信签名
-       */
-      if (Common.getPhoneType() == "ios") {
-        this.$server.getWxConfig(this.url).then((res: any) => {
-          this.SignatureObj = res.weChatSignature;
-          wxApi.wxConfig(this.SignatureObj);
-        });
-      }
     }
   }
 </script>
@@ -97,15 +89,15 @@
     transform: translate(-100%, 0);
   }
   /* .slide-left-enter-active {
-                                                                    opacity: 0;
-                                                                    -webkit-transform: translate(-100%, 0);
-                                                                    transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
-                                                                    transform: translate(-100%, 0);
-                                                                  }
-                                                                  .slide-left-enter-to {
-                                                                    opacity: 0;
-                                                                    -webkit-transform: translate(0, 0);
-                                                                    transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
-                                                                    transform: translate(0, 0);
-                                                                  } */
+                                                                                                                  opacity: 0;
+                                                                                                                  -webkit-transform: translate(-100%, 0);
+                                                                                                                  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+                                                                                                                  transform: translate(-100%, 0);
+                                                                                                                }
+                                                                                                                .slide-left-enter-to {
+                                                                                                                  opacity: 0;
+                                                                                                                  -webkit-transform: translate(0, 0);
+                                                                                                                  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+                                                                                                                  transform: translate(0, 0);
+                                                                                                                } */
 </style>

@@ -38,6 +38,7 @@ declare namespace Server {
   getWxConfig(url: string): Promise<any>;
   getUser(id: string): Promise<any>;
   delPaitient(id: number, patientId: number): Promise<any>;
+  AddAutoCode(id: string, phone: number): Promise<any>;
   /**
    * 修改用户信息
    * @param id
@@ -90,5 +91,10 @@ declare namespace Server {
   GetOpenid(code: string): Promise<any>
   GetOrderNews(id: number): Promise<any>
   GetPayOrder(productId: number, doctorId: number, patientId: number): Promise<any>
+  /**
+   * 获取城市id
+   * @param cityName 城市姓名
+   */
+  GetCityId(cityName: string): Promise<any>
  }
 }

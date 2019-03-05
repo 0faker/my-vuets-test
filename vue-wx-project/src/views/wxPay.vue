@@ -20,9 +20,18 @@
       <div class="time_out">
         <span>剩余支付时间：</span>
         <span>
-          <span class="hh">{{time.hour}}</span> :
-          <span class="mm">{{time.min}}</span> :
-          <span class="ss">{{time.sec}}</span>
+          <span
+            v-cloak
+            class="hh"
+          >{{time.hour}}</span> :
+          <span
+            v-cloak
+            class="mm"
+          >{{time.min}}</span> :
+          <span
+            v-cloak
+            class="ss"
+          >{{time.sec}}</span>
         </span>
       </div>
       <div
@@ -39,7 +48,8 @@
     </div>
     <div class="shopnews">
       <div>服务内容：
-        <span v-cloak> {{order.content}}</span> <span>（{{order.doctor.name||''}}）</span>
+        <span v-cloak> {{order.content}}</span>
+        <span v-cloak>（{{order.doctor.name||''}}）</span>
       </div>
 
     </div>
@@ -59,32 +69,7 @@
     openId!: number;
     public SignatureObj?: SignatureObj; // 微信签名
     public url: string = location.href;
-    // = {
-    //   id: 1000000433602663,
-    //   patient: {
-    //     id: 1,
-    //     name: "潘振东"
-    //   },
-    //   phase: 1,
-    //   price: 0.01,
-    //   content: "运动处方：1次",
-    //   addTime: 1540177160000,
-    //   depositPrice: 0,
-    //   wxPayInfoEntity: {
-    //     id: 1,
-    //     title: "关爱心脏康复，请帮我付费",
-    //     subtitle: "我正在进行心脏康复运动，需要你的关心，快帮我付款吧！",
-    //     urlTemplate:
-    //       "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxc1755ba87a7baa57&redirect_uri=http://www.creyond.com/ppay/wxpay?order_id={id}&response_type=CODE&scope=snsapi_base&url=http://tmxz.viphk1.ngrok.org",
-    //     addTime: null,
-    //     updateTime: null
-    //   },
-    //   doctor: {
-    //     id: 23,
-    //     name: "姚梦"
-    //   },
-    //   type: 1
-    // };
+
     public counttime!: number;
     public time: {
       hour: string;
@@ -167,21 +152,21 @@
      * 支付
      */
     public pay() {
-      if (common.getPhoneType() !== "ios") {
-        this.$server.getWxConfig(this.url).then((res: WeChatSignature) => {
-          this.SignatureObj = {
-            debug: false,
-            nonceStr: res.nonceStr,
-            signature: res.signature,
-            timeStamp: res.timeStamp,
-            jsApiList: []
-          };
-          wxApi.wxConfig(this.SignatureObj);
-          this.chooseWXPay();
-        });
-      } else {
+      // if (common.getPhoneType() !== "ios") {
+      this.$server.getWxConfig(this.url).then((res: WeChatSignature) => {
+        this.SignatureObj = {
+          debug: false,
+          nonceStr: res.nonceStr,
+          signature: res.signature,
+          timeStamp: res.timeStamp,
+          jsApiList: []
+        };
+        wxApi.wxConfig(this.SignatureObj);
         this.chooseWXPay();
-      }
+      });
+      // } else {
+      //   this.chooseWXPay();
+      // }
     }
     /**
      * 微信支付
@@ -202,7 +187,7 @@
               // 支付成功后的回调函数
               this.$router.push({ path: "/wxpaysuccess" });
             },
-            fail: function(error: any) {
+            fail: (error: any) => {
               this.$router.push({ path: "/wxpayfail" });
               //
             }

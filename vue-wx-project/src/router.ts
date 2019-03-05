@@ -113,6 +113,7 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/accomplishList.vue'),
       meta: {
         title: '康复记录列表',
+        keepAlive: true,
       },
     },
     {
@@ -134,6 +135,7 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/preventList.vue'),
       meta: {
         title: '预防记录列表',
+        keepAlive: true,
       },
     },
     {
@@ -158,6 +160,7 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/assessmentList.vue'),
       meta: {
         title: '评价记录列表',
+        keepAlive: true,
       },
     },
     {
@@ -182,6 +185,7 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/monitorList.vue'),
       meta: {
         title: '监测记录列表',
+        keepAlive: true,
       },
     },
     {

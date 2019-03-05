@@ -127,7 +127,14 @@ class Common {
     switch (type) {
       case 'd': return moment(input).format('YYYY-MM-DD'); // 天
       case 'hms': return moment(input).format('HH:mm:ss'); // 秒
+      case 'point': return moment(input).format('YYYY.MM.DD'); // 点拼接
     }
+  }
+  /**
+  * 时间戳=>字符串 
+  */
+  public getDayMonth(input: number) {
+    return moment(input).format('M月d日');
   }
   /**
    * 转换记录列表数据(除康复记录)
@@ -197,7 +204,7 @@ class Common {
    * @param str
    */
   public getInitials(str: string) {
-    let result = ''
+    let result = '';
     pinyin(str, { noTone: true }).split(' ').forEach((element: String) => {
       result += element[0];
     });
@@ -209,11 +216,19 @@ class Common {
    * @param str
    */
   public getPinyin(str: string) {
-    let result = pinyin(str, { noTone: true }).split(' ').join('')
+    let result = '';
+    result = pinyin(str, { noTone: true }).split(' ').join('')
     //小写转大写
     return result.toUpperCase();
   }
+  /**
+   * 显示toast提示
+   * @param type 提示类型 success normal fail
+   * @param msg 提示文字
+   */
+  showToast(type: string, msg: string) {
 
+  }
 }
 
 

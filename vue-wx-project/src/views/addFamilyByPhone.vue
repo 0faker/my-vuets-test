@@ -33,14 +33,18 @@
     <div class="tel">
       <input
         type="tel"
-        placeholder="请输入您的手机号"
+        placeholder="请输入亲属的手机号"
         v-model="showTel"
         maxlength=13
         @input="verifyPhone"
       >
-      <div class="clear">
+      <div
+        class="clear"
+        v-if='showClear'
+        @click="clear"
+      >
         <img
-          src=""
+          src="../assets/delete.png"
           alt=""
         >
       </div>
@@ -56,6 +60,7 @@
       >
       <button
         class="get-code"
+        @click="sendCode"
         :style="{backgroundColor:activeCodeColor}"
         :disabled="isCanGetCode"
       >{{getCodeMsg}}</button>
@@ -79,93 +84,135 @@
 </template>
 
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import Common from '../common/common';
-@Component
-export default class addFamilyByPhone extends Vue {
-  public userId: string = '';
-  public tel: string = ''; // 号码
-  public showTel: string = ''; // 输入框中显示的号码
-  public clearable: boolean = true; // 清空按钮
-  public warn: boolean = false; // 提示语
-  public code: string = ''; // 验证码
-  public wrongCodeMsg?: string = ''; // 验证码错误提示
-  public showWrongCodeMsg: boolean = false; // 验证码错误提示显示
-  // ----ui-----
-  public isCanGetCode?: boolean; // 获取验证码可点击
-  public isSendCode: boolean = false; // 是否可再发送验证码
-  public getCodeMsg?: string; // 验证码内文字
-  public activeCodeColor?: string; // 获取验证码按钮颜色
-  public isCanLogin?: boolean; // 登录按钮可用状态
-  public activeLoginColor?: string; // 登录按钮颜色
-  public loadding?: boolean = false;
-  public mounted() {
-    // this.wrongCodeMsg = "验证码有误，请重新输入！";
-    this.showWrongCodeMsg = false;
-    this.isCanGetCode = true;
-    this.activeCodeColor = '#6d726d';
-    this.getCodeMsg = '获取验证码';
-    this.isCanLogin = true;
-    this.activeLoginColor = '#6d726d';
-    this.userId = this.$route.params.id;
-    // -----ui-------
-    this.loadding = true;
-  }
-  /**
-   * 回退
-   */
-  public back() {
-    this.$store.state.isBack = true;
-    this.$router.back();
-  }
-
-  /**
-   * 验证手机号
-   */
-  public verifyPhone() {
-    const input: string = this.showTel;
-    this.showTel = Common.change(input);
-    this.tel = this.showTel.replace(/\s+/g, '');
-    // 正则匹配
-    if (Common.regPhone(+this.tel)) {
-      // 匹配
-      this.isCanGetCode = false;
-      this.activeCodeColor = '#4caf50';
-    } else {
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  import Common from "../common/common";
+  @Component
+  export default class addFamilyByPhone extends Vue {
+    public userId: string = "";
+    public tel: string = ""; // 号码
+    public showTel: string = ""; // 输入框中显示的号码
+    public clearable: boolean = true; // 清空按钮
+    public warn: boolean = false; // 提示语
+    public code: string = ""; // 验证码
+    public wrongCodeMsg?: string = ""; // 验证码错误提示
+    private isSendedCode: boolean = false; // 是否已发送验证码
+    public showWrongCodeMsg: boolean = false; // 验证码错误提示显示
+    // ----ui-----
+    public isCanGetCode?: boolean; // 获取验证码可点击
+    public isSendCode: boolean = false; // 是否可再发送验证码
+    public getCodeMsg?: string; // 验证码内文字
+    public activeCodeColor?: string; // 获取验证码按钮颜色
+    public isCanLogin?: boolean; // 登录按钮可用状态
+    public activeLoginColor?: string; // 登录按钮颜色
+    showClear: boolean = false;
+    public loadding?: boolean = false;
+    public mounted() {
+      // this.wrongCodeMsg = "验证码有误，请重新输入！";
+      this.showWrongCodeMsg = false;
       this.isCanGetCode = true;
-      this.activeCodeColor = '#6d726d';
+      this.activeCodeColor = "#6d726d";
+      this.getCodeMsg = "获取验证码";
+      this.isCanLogin = true;
+      this.activeLoginColor = "#6d726d";
+      this.userId = this.$route.params.id;
+      // -----ui-------
+      this.loadding = true;
+    }
+    /**
+     * 回退
+     */
+    public back() {
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+
+    /**
+     * 验证手机号
+     */
+    public verifyPhone() {
+      const input: string = this.showTel;
+      this.showTel = Common.change(input);
+      this.tel = this.showTel.replace(/\s+/g, "");
+      this.showClear = this.tel ? true : false;
+      // 正则匹配
+      if (Common.regPhone(+this.tel)) {
+        // 匹配
+        // 验证码倒计时中
+        if (this.isSendedCode) {
+          this.isCanGetCode = false;
+          this.activeCodeColor = "#4caf50";
+        }
+
+        this.isCanLogin = this.code.length == 4 ? false : true;
+      } else {
+        this.isCanGetCode = true;
+        this.activeCodeColor = "#6d726d";
+        this.isCanLogin = true;
+      }
+    }
+    /**
+     * 获取验证码
+     */
+    public sendCode() {
+      // if (!this.isdisabled) {
+      // }
+      this.$server.AddAutoCode(this.userId, +this.tel).then(res => {
+        if (res.code == "C200") {
+          this.isSendedCode = true;
+          this.isCanGetCode = true;
+          this.activeCodeColor = "#6d726d";
+          this.warn = true;
+          // 设置倒计时
+          let countdownNumber = 60; // 设置60s
+          this.getCodeMsg = countdownNumber + "s";
+          let countdown = setInterval(() => {
+            countdownNumber--;
+            console.log(this.getCodeMsg);
+            this.getCodeMsg = countdownNumber + "s";
+            if (countdownNumber < 0) {
+              clearInterval(countdown);
+              this.getCodeMsg = "重新获取";
+              this.isSendedCode = false;
+              this.activeCodeColor = "#4caf50";
+              this.isCanGetCode = false;
+            }
+          }, 1000);
+        } else {
+          this.showWrongCodeMsg = true;
+
+          this.wrongCodeMsg = res.msg;
+        }
+      });
+    }
+    clear() {
+      this.showTel = "";
+      this.showClear = false;
+    }
+    /**
+     * 验证码
+     */
+    public verifyCode() {
+      if (Common.regPhone(+this.tel)) {
+        this.code = this.code.replace(/\s+/g, "");
+        this.isCanLogin = this.code.length === 4 ? false : true;
+        console.log(this.isCanLogin);
+      }
+    }
+    /**
+     * 确定绑定亲属
+     */
+    public bind() {
+      this.$server.bindFamily(+this.userId, this.tel, this.code).then(res => {
+        if (res.code === "C200") {
+          this.back();
+        } else {
+          this.wrongCodeMsg = res.msg;
+          console.log(res);
+          this.showWrongCodeMsg = true;
+        }
+      });
     }
   }
-  /**
-   * 获取验证码
-   */
-  public sendCode() {
-    // if (!this.isdisabled) {
-    // }
-  }
-  /**
-   * 验证码
-   */
-  public verifyCode() {
-    this.code = this.code.replace(/\s+/g, '');
-    this.isCanLogin = this.code.length === 4 ? false : true;
-    console.log(this.isCanLogin);
-  }
-  /**
-   * 确定绑定亲属
-   */
-  public bind() {
-    this.$server.bindFamily(+this.userId, this.tel, this.code).then((res) => {
-      if (res.code === 'C200') {
-        this.back();
-      } else {
-        this.wrongCodeMsg = res.msg;
-        console.log(res);
-        this.showWrongCodeMsg = true;
-      }
-    });
-  }
-}
 </script>
 <style lang='scss' scoped>
   .add_family {
@@ -215,6 +262,19 @@ export default class addFamilyByPhone extends Vue {
         &:focus {
           outline: none;
           border: 0;
+        }
+      }
+      > .clear {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 1.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        > img {
+          width: 100%;
+          height: 100%;
         }
       }
       > .get-code {

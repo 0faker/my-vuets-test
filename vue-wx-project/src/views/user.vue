@@ -19,8 +19,17 @@
         :src="headImgUrl"
         alt=""
       >
-      <div class="tel">
+      <div
+        v-cloak
+        class="tel"
+      >
         {{ changePhone(userPhone)}}
+      </div>
+      <div class="next">
+        <img
+          src="../assets/ic_searh_next@2x.png"
+          alt=""
+        >
       </div>
     </div>
     <div
@@ -58,8 +67,85 @@
             @click="goFamilyInfo(item.id)"
           >
             <div class="item-content">
-              <span class="name">{{item.name}}</span><span class="sex"></span>
-              <div class="phone">
+              <span
+                v-cloak
+                class="name"
+              >{{item.name}}</span><span class="sex">
+                <svg
+                  v-if="item.sex==='0'"
+                  width="1.6rem"
+                  height="1.6rem"
+                  viewBox="0 0 44 44"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                >
+                  <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+                  <title>ic_male</title>
+                  <desc>Created with Sketch.</desc>
+                  <defs>
+                    <polygon
+                      id="path-1"
+                      points="6 5 38 5 38 38 6 38"
+                    ></polygon>
+                  </defs>
+                  <g
+                    id="亲属端"
+                    stroke="none"
+                    stroke-width="1"
+                    fill="none"
+                    fill-rule="evenodd"
+                  >
+                    <g id="ic_male">
+                      <mask
+                        id="mask-2"
+                        fill="white"
+                      >
+                        <use xlink:href="#path-1"></use>
+                      </mask>
+                      <g id="Clip-2"></g>
+                      <path
+                        d="M25.0783426,9 L25.0783426,11.4861274 L30.2773796,11.4861274 L25.1801987,16.9891108 C21.2620167,14.2517424 15.2868691,14.6013065 11.7340116,18.4380671 C7.86860163,22.6152272 8.14000047,29.1970152 12.306671,33.0757366 C16.4695232,36.9540652 22.9572804,36.6670495 26.8264109,32.4900531 C30.3792357,28.6532597 30.669139,23.0138547 27.1616779,18.8349271 L32.5194225,13.0456808 L32.5194225,18.9482081 L35,18.9482081 L35,9 L25.0783426,9 M24.8147101,30.9105525 C21.9178677,34.0309131 17.0234979,34.2125588 13.9009732,31.3160731 C10.782327,28.4177975 10.5985789,23.5218839 13.4990346,20.4012582 C16.3958769,17.2825881 21.2902136,17.0988542 24.4131361,19.9974281 C27.5316828,22.8938806 27.7116519,27.790192 24.8147101,30.9105525"
+                        id="Fill-1"
+                        fill="#60C1E9"
+                        mask="url(#mask-2)"
+                      ></path>
+                    </g>
+                  </g>
+                </svg>
+                <svg
+                  width="1.6rem"
+                  v-if="item.sex==='1'"
+                  height="1.6rem"
+                  viewBox="0 0 44 44"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                >
+                  <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+                  <title>ic_female</title>
+                  <desc>Created with Sketch.</desc>
+                  <defs></defs>
+                  <g
+                    id="亲属端"
+                    stroke="none"
+                    stroke-width="1"
+                    fill="none"
+                    fill-rule="evenodd"
+                  >
+                    <g
+                      id="ic_female"
+                      fill="#E3593C"
+                    >
+                      <path d="M22.12,7 C17.2684025,7 13,11.2312756 13,16.12 C13,21.1786552 16.5955459,25.1400242 21.36,26 L21.36,29.04 L16.8,29.04 L16.8,31.32 L21.36,31.32 L21.36,35.88 L23.64,35.88 L23.64,31.32 L28.2,31.32 L28.2,29.04 L23.64,29.04 L23.64,26 C28.4044541,25.1400242 32,21.1788164 32,16.12 C32,11.2312756 27.7315975,7 22.12,7 Z M22.5,9.28 C26.5030518,9.28 29.72,12.4970465 29.72,16.5 C29.72,20.5029535 26.5030518,23.72 22.5,23.72 C18.4969061,23.72 15.28,20.503122 15.28,16.5 C15.28,12.4970465 18.4969061,9.28 22.5,9.28 Z"></path>
+                    </g>
+                  </g>
+                </svg>
+              </span>
+              <div
+                v-cloak
+                class="phone"
+              >
                 {{changePhone(item.phone)}}
               </div>
             </div>
@@ -100,7 +186,8 @@
   @Component({
     components: {
       AddFamliy
-    }
+    },
+    name: "user"
   })
   export default class UserComponent extends Vue {
     public userPhone: string = "";
@@ -122,24 +209,39 @@
     public CancelWords: boolean = true;
     public loadding: boolean = true;
     public noFamily: boolean = false;
-
+    isFirst: boolean = true; //是第一次进入防止请求多次接口
     /**
      * 钩子
      */
-    public created() {}
+    public created() {
+      this.Initialize();
+    }
     /**
      * dom加载完成钩子
      */
-    public mounted() {
-      this.Initialize();
+    public mounted() {}
+    activated() {
+      if (!this.isFirst) {
+        console.log(this.isFirst);
+        this.$store.state.isBack = false;
+        this.$server.getPatient(this.userid).then((res: any) => {
+          this.families = res.result;
+        });
+      }
+    }
+    /**
+     * 缓存的组件离开后调用
+     */
+    deactivated() {
+      this.isFirst = false;
     }
     /**
      *  初始化
      */
     public Initialize() {
-      // 页面加载蒙层
-      const myPopup: any = this.$refs.myPopup;
-      myPopup.show();
+      // // 页面加载蒙层
+      // const myPopup: any = this.$refs.myPopup;
+      // myPopup.show();
       this.userid = this.$route.params.id;
       axios
         .all([
@@ -148,7 +250,7 @@
         ])
         .then(
           axios.spread((Patient: Patient.PatientList, User: any) => {
-            myPopup.hide();
+            // myPopup.hide();
             // 两个请求现在都执行完成
             this.families = Patient.result;
             this.noFamily = this.families.length === 0 ? true : false;
@@ -163,7 +265,6 @@
      */
     public goFamilyInfo(id: number) {
       const selectedFamily = this.families.find(x => x.id === id);
-      console.log(selectedFamily);
       ls.set("selectedFamily", selectedFamily);
       this.$router.push({ path: `/kinsfolkinfo/${id}` });
     }
@@ -232,6 +333,7 @@
             this.families.splice(index, 1);
             console.log(this.families);
             this.noFamily = this.families.length === 0 ? true : false;
+            this.isShowCancel = 100000;
           }
         });
       } else {
@@ -300,6 +402,20 @@
         font-size: 1.5rem;
         margin-left: 5.5rem;
       }
+      > .next {
+        position: absolute;
+        top: 50%;
+        right: 1.5rem;
+        transform: translateY(-50%);
+        width: 3rem;
+        height: 3rem;
+        // vertical-align: middle;
+        border-radius: 50%;
+        > img {
+          width: 100%;
+          height: 100%;
+        }
+      }
     }
     > .families {
       padding-top: 0.79rem;
@@ -331,8 +447,14 @@
                 color: $basefontcolor;
               }
               > .phone {
-                margin-top: 0.415rem;
+                // margin-top: 0.415rem;
                 color: #979797;
+              }
+              > .sex {
+                display: inline-block;
+                vertical-align: middle;
+                // height: 100%;
+                margin-left: 0.51rem;
               }
             }
             > .cancel {
@@ -347,13 +469,13 @@
               z-index: 10;
               text-align: center;
               color: #fff;
-              font-size: 1.5rem;
               > div {
                 width: 100%;
                 position: absolute;
                 top: 50%;
                 left: 0;
                 text-align: center;
+                font-size: 1.2rem;
                 transform: translateY(-50%);
               }
             }

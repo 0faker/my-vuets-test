@@ -18,7 +18,7 @@ module.exports = {
   assetsDir: 'public',
   filenameHashing: true,
   runtimeCompiler: true,
-  productionSourceMap: false,
+  productionSourceMap: undefined,
   parallel: undefined,
 
   chainWebpack: config => {
@@ -75,7 +75,8 @@ module.exports = {
     'cube-ui': {
       postCompile: true,
       theme: true
-    }
+    },
 
-  }
+
+  },
 }

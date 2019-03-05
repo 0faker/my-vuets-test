@@ -53,6 +53,8 @@
   import { Component, Prop, Vue } from "vue-property-decorator";
   import common from "../../common/common";
   import ls from "local-storage";
+  import { SignatureObj } from "../../entity/SignatureObj";
+  import wxApi from "../../common/wxConfig";
   @Component
   export default class ChoosePatient extends Vue {
     public phoneNumber: string = ""; // 手机号
@@ -63,8 +65,12 @@
     public codeWords: string = "获取验证码";
     public isShowButton: boolean = false; // 显示购买按钮
     public patientId: string = ""; // 患者id
+    // 微信签名
+    public url: string = location.href;
+    public SignatureObj?: SignatureObj; // 微信签名
     created() {
       this.getOpenid();
+      this.wxConfig();
     }
     /**
      * 获取openid
@@ -76,6 +82,17 @@
         // 保存openid
         ls.set("openId", res.result);
       });
+    }
+    /**
+     * 微信签名(ios)
+     */
+    wxConfig() {
+      if (common.getPhoneType() == "ios") {
+        this.$server.getWxConfig(this.url).then((res: any) => {
+          this.SignatureObj = res.weChatSignature;
+          wxApi.wxConfig(this.SignatureObj);
+        });
+      }
     }
     /*
      * 验证手机号

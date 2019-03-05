@@ -47,49 +47,49 @@
   </div>
 </template>
 <script lang='ts'>
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import moment from 'moment';
-import ls from 'local-storage';
-@Component
-export default class CyclePrescriptionLists extends Vue {
-    public id: string = '';
+  import { Component, Prop, Vue } from "vue-property-decorator";
+  import moment from "moment";
+  import ls from "local-storage";
+  @Component
+  export default class CyclePrescriptionLists extends Vue {
+    public id: string = "";
     public cyclePrescriptions: Prescriptions.CyclePrescriptions[] = [];
     public mounted() {
-    this.id = this.$route.params.id;
-    this.getCyclePrescriptions();
-  }
-  /**
-   * 回到上页
-   */
+      this.id = this.$route.params.id;
+      this.getCyclePrescriptions();
+    }
+    /**
+     * 回到上页
+     */
     public back() {
-        this.$store.state.isBack = true;
-        this.$router.back();
-  }
-  /**
-   * 获取周期处方
-   */
+      this.$store.state.isBack = true;
+      this.$router.back();
+    }
+    /**
+     * 获取周期处方
+     */
     public getCyclePrescriptions() {
-    this.$server
-      .getCyclePrescriptions(+this.id)
-      .then((res: Prescriptions.CyclePrescriptions[]) => {
-        this.cyclePrescriptions = res;
-        this.$store.state.cyclePrescriptions = this.cyclePrescriptions;
-      });
-  }
-  /**
-   * 时间戳=>字符串
-   */
+      this.$server
+        .getCyclePrescriptions(+this.id)
+        .then((res: Prescriptions.CyclePrescriptions[]) => {
+          this.cyclePrescriptions = res;
+          this.$store.state.cyclePrescriptions = this.cyclePrescriptions;
+        });
+    }
+    /**
+     * 时间戳=>字符串
+     */
     public getAddTime(input: string) {
-    return moment(input).format('YYYY.MM.DD');
-  }
-  /**
-   * 查看日处方
-   */
+      return moment(input).format("YYYY.MM.DD");
+    }
+    /**
+     * 查看日处方
+     */
     public check(id: number) {
-    ls.set('cyclePrescriptions', this.cyclePrescriptions);
-    this.$router.push({ path: '/cycleprescription/' + id });
+      ls.set("cyclePrescriptions", this.cyclePrescriptions);
+      this.$router.push({ path: "/cycleprescription/" + id });
+    }
   }
-}
 </script>
 <style lang='scss' scoped>
   .prescriptions {
@@ -129,6 +129,11 @@ export default class CyclePrescriptionLists extends Vue {
         // margin: 1rem;
         height: 100%;
         background-color: #fff;
+        overflow: hidden;
+        overflow-y: scroll;
+        &::-webkit-scrollbar {
+          display: none;
+        }
         > h2 {
           text-align: center;
           margin-bottom: 1rem;
@@ -151,6 +156,7 @@ export default class CyclePrescriptionLists extends Vue {
               padding: 0.71rem 0;
               > a {
                 color: $baseGreen;
+                font-weight: bolder;
                 &:active,
                 &:visited,
                 &:focus,
